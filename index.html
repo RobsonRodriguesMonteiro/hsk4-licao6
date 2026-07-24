@@ -1,0 +1,2434 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HSK 4 - Lição 6: 一分钱一分货</title>
+    <style>
+    :root {
+        --bg-gradient-1: #e0f8ff;
+        --bg-gradient-2: #cceeff;
+        --color-primary: #0284c7;
+        --color-primary-light: #e0f2fe;
+        --color-primary-hover: #0369a1;
+        --glass-bg: rgba(255, 255, 255, 0.75);
+        --glass-border: rgba(255, 255, 255, 0.6);
+        --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+        --text-main: #1e293b;
+        --text-muted: #64748b;
+        --color-correct: #065f46;
+        --color-correct-bg: #d1fae5;
+        --color-correct-border: #10b981;
+        --color-incorrect: #991b1b;
+        --color-incorrect-bg: #fee2e2;
+        --color-incorrect-border: #ef4444;
+        --color-gold: #d97706;
+        --color-jade: #059669;
+        --border-radius: 16px;
+    }
+    * { box-sizing: border-box; }
+    body {
+        margin: 0; padding: 0;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, var(--bg-gradient-1), var(--bg-gradient-2));
+        color: var(--text-main);
+        display: flex; justify-content: center; align-items: center;
+        min-height: 100vh; overflow: hidden; position: relative;
+    }
+    .simulator-wrapper {
+        display: flex; width: 95vw; height: 95vh; max-width: 1400px;
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border); border-radius: var(--border-radius);
+        box-shadow: var(--glass-shadow); overflow: hidden; position: relative;
+    }
+    .info-btn {
+        position: absolute; top: 20px; right: 20px; background: white;
+        color: var(--color-primary); border: 1px solid var(--color-primary-light);
+        width: 40px; height: 40px; border-radius: 50%; font-size: 20px;
+        font-style: italic; font-weight: bold; cursor: pointer; z-index: 50;
+        box-shadow: 0 4px 10px rgba(2, 132, 199, 0.2); transition: 0.3s;
+        display: flex; align-items: center; justify-content: center;
+    }
+    .info-btn:hover { background: var(--color-primary); color: white; transform: scale(1.05); }
+    .modal-overlay {
+        position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+        background-color: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px);
+        z-index: 100; display: none; justify-content: center; align-items: center; padding: 20px;
+    }
+    .modal-content {
+        background: rgba(255, 255, 255, 0.95); padding: 35px; border-radius: var(--border-radius);
+        max-width: 550px; border: 1px solid var(--glass-border);
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2); line-height: 1.6; color: var(--text-main);
+    }
+    .modal-content h2 { color: var(--color-primary); margin-top: 0; text-align: center; }
+    .modal-content ul { padding-left: 20px; }
+    .modal-content li { margin-bottom: 10px; }
+    .close-modal-btn {
+        background: var(--color-primary); color: white; border: none; padding: 12px 20px;
+        border-radius: 8px; cursor: pointer; margin-top: 20px; width: 100%; font-weight: bold;
+        font-size: 16px; transition: 0.3s; box-shadow: 0 4px 10px rgba(2, 132, 199, 0.3);
+        display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .close-modal-btn:hover { background: var(--color-primary-hover); transform: translateY(-2px); }
+    .left-panel {
+        width: 230px; flex-shrink: 0; background: rgba(255, 255, 255, 0.4);
+        border-right: 1px solid var(--glass-border); display: flex; flex-direction: column;
+        align-items: center; padding: 30px 15px; position: relative;
+        transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .left-panel.collapsed { width: 80px; padding: 30px 10px; }
+    .toggle-btn {
+        position: absolute; top: 20px; right: -16px; width: 32px; height: 32px;
+        background: white; border: 1px solid var(--glass-border); border-radius: 50%;
+        display: flex; align-items: center; justify-content: center; cursor: pointer;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); z-index: 10;
+        color: var(--color-primary); transition: transform 0.4s ease;
+    }
+    .left-panel.collapsed .toggle-btn svg { transform: rotate(180deg); }
+    .svg-icon-main { width: 48px; height: 48px; color: var(--color-primary); margin-bottom: 20px; transition: 0.3s; }
+    .left-panel.collapsed .svg-icon-main { width: 32px; height: 32px; }
+    .test-info { text-align: center; margin-bottom: 25px; width: 100%; transition: opacity 0.3s; }
+    .left-panel.collapsed .test-info, .left-panel.collapsed .audio-instruction, .left-panel.collapsed .section-tracker {
+        opacity: 0; visibility: hidden; pointer-events: none; position: absolute;
+    }
+    .test-info .chinese-text { font-size: 22px; margin: 0 0 5px 0; color: var(--color-primary); font-weight: bold; }
+    .test-info .lesson-sub { font-size: 14px; color: var(--text-muted); margin-top: 8px; }
+    .section-tracker { width: 100%; margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+    .track-item {
+        display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 10px;
+        font-size: 13px; font-weight: 600; color: var(--text-muted);
+        background: rgba(255, 255, 255, 0.5); border: 1px solid transparent; transition: 0.3s;
+    }
+    .track-item.active { background: var(--color-primary-light); color: var(--color-primary-hover); border-color: var(--color-primary); }
+    .track-item.done { color: var(--color-jade); }
+    .track-item .dot { width: 10px; height: 10px; border-radius: 50%; background: #cbd5e1; flex-shrink: 0; }
+    .track-item.active .dot { background: var(--color-primary); }
+    .track-item.done .dot { background: var(--color-jade); }
+    .audio-instruction {
+        color: var(--color-primary-hover); font-size: 14px; font-weight: bold; margin-top: auto;
+        padding: 10px 15px; border: 1px solid var(--color-primary-light); border-radius: 20px;
+        background: white; box-shadow: 0 4px 10px rgba(2, 132, 199, 0.1); text-align: center;
+        transition: opacity 0.3s; display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .right-panel {
+        flex: 1; display: flex; flex-direction: column; padding: 25px 40px;
+        overflow-y: auto; position: relative; background: transparent;
+    }
+    .right-panel::-webkit-scrollbar { width: 8px; }
+    .right-panel::-webkit-scrollbar-track { background: transparent; }
+    .right-panel::-webkit-scrollbar-thumb { background: rgba(2, 132, 199, 0.3); border-radius: 4px; }
+    .right-panel::-webkit-scrollbar-thumb:hover { background: var(--color-primary); }
+    .header-bar {
+        display: flex; justify-content: space-between; align-items: center;
+        border-bottom: 2px solid var(--glass-border); padding-bottom: 12px; margin-bottom: 20px; flex-shrink: 0;
+    }
+    .progress-indicator { font-size: 16px; font-weight: 600; color: var(--text-muted); }
+    .part-indicator {
+        background: var(--color-primary-light); padding: 6px 16px; border-radius: 20px;
+        font-size: 14px; font-weight: bold; color: var(--color-primary);
+    }
+    .intro-container, .question-container, .results-container, .section-container {
+        display: none; flex-direction: column; animation: fadeIn 0.5s ease;
+    }
+    .intro-container, .results-container { height: 100%; overflow-y: auto; padding-right: 10px; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .intro-title {
+        color: var(--color-primary); font-size: 26px; font-weight: bold;
+        border-bottom: 2px solid var(--color-primary-light); padding-bottom: 10px; margin-bottom: 15px;
+    }
+    .intro-instructions {
+        background: white; padding: 15px; border-radius: 8px; border-left: 4px solid var(--color-primary);
+        margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    }
+    .example-box {
+        background: rgba(255, 255, 255, 0.6); border: 1px solid var(--glass-border);
+        border-left: 4px solid var(--color-gold); padding: 20px; margin-bottom: 15px;
+        border-radius: 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+    .example-label {
+        color: var(--text-muted); font-weight: bold; font-size: 14px; margin-bottom: 10px;
+        text-transform: uppercase; letter-spacing: 1px;
+    }
+    .btn-start-part {
+        background: var(--color-primary); color: white; border: none; padding: 14px 28px;
+        border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer;
+        margin-top: 10px; margin-bottom: 20px; align-self: center; transition: 0.3s;
+        box-shadow: 0 4px 15px rgba(2, 132, 199, 0.3); flex-shrink: 0;
+        display: flex; align-items: center; gap: 8px;
+    }
+    .btn-start-part:hover { background: var(--color-primary-hover); transform: translateY(-2px); }
+    .text-block-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px; }
+    .action-buttons-group { display: flex; gap: 8px; align-items: center; }
+    .btn-translate-inline {
+        background: white; border: 1px solid var(--color-primary-light); color: var(--color-primary);
+        padding: 6px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;
+        transition: 0.2s; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02); display: flex; align-items: center; gap: 5px;
+    }
+    .btn-translate-inline:hover { background: var(--color-primary-light); }
+    .translation-display {
+        color: var(--text-muted); margin-top: 10px; padding-top: 10px; border-top: 1px dashed #cbd5e1;
+        font-size: 15px; display: none; line-height: 1.5;
+    }
+    .instruction-block {
+        margin-bottom: 15px; background: rgba(255, 255, 255, 0.8); padding: 15px; border-radius: 8px;
+        border-left: 4px solid var(--color-gold); box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    }
+    .text-block {
+        margin-bottom: 15px; background: white; padding: 20px; border-radius: 12px;
+        border-left: 4px solid var(--color-primary); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+    .text-label {
+        font-size: 12px; color: var(--text-muted); text-transform: uppercase; font-weight: 600;
+        letter-spacing: 1px; display: flex; align-items: center; gap: 6px;
+    }
+    .chinese-text { font-size: 24px; line-height: 1.8; letter-spacing: 1px; color: var(--text-main); }
+    .char-interactive {
+        cursor: pointer; display: inline-block; transition: color 0.2s, background-color 0.2s;
+        border-radius: 4px; padding: 0 1px;
+    }
+    .char-interactive:hover { color: var(--color-primary-hover); background-color: var(--color-primary-light); }
+    .pinyin-display {
+        font-size: 16px; color: var(--color-jade); margin-top: 10px; line-height: 1.4;
+        display: none; padding-top: 8px; border-top: 1px dashed #cbd5e1;
+    }
+    .options-container { display: flex; flex-direction: column; gap: 16px; margin-bottom: 20px; }
+    .options-container.tf-mode { flex-direction: row; justify-content: flex-start; gap: 20px; }
+    .option-wrapper { display: flex; flex-direction: column; }
+    .option-btn {
+        background: white; border: 2px solid #cbd5e1; color: var(--text-main); padding: 14px 20px;
+        border-radius: 8px; cursor: pointer; font-size: 18px; text-align: left; transition: all 0.2s;
+        display: flex; align-items: center; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+    }
+    .option-btn:hover:not(.locked) { border-color: var(--color-primary); background: var(--color-primary-light); }
+    .option-btn.selected { border-color: var(--color-primary); background: #f0f9ff; box-shadow: 0 0 0 2px var(--color-primary-light); }
+    .option-btn.locked { cursor: default; }
+    .option-btn.is-correct {
+        border-color: var(--color-correct) !important; background-color: var(--color-correct) !important;
+        color: white !important; box-shadow: 0 4px 10px rgba(6, 95, 70, 0.3) !important;
+    }
+    .option-btn.is-incorrect {
+        border-color: var(--color-incorrect) !important; background-color: var(--color-incorrect) !important;
+        color: white !important; box-shadow: 0 4px 10px rgba(153, 27, 27, 0.3) !important;
+    }
+    .option-btn.tf-btn { font-size: 40px; width: 90px; height: 90px; justify-content: center; border-radius: 12px; }
+    .option-controls { display: flex; gap: 8px; margin-top: 8px; }
+    .r-option-wrapper {
+        background: white; border: 1px solid rgba(0, 0, 0, 0.1); border-radius: 8px; margin-bottom: 10px;
+        padding: 12px 15px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02); transition: all 0.2s;
+    }
+    .r-option-wrapper.locked { pointer-events: none; }
+    .r-item { cursor: pointer; font-size: 18px; display: flex; align-items: flex-start; gap: 10px; padding: 5px 0; border-radius: 6px; }
+    .r-item:hover { color: var(--color-primary); }
+    .option-content { display: inline; word-break: keep-all; line-height: 1.5; }
+    .r-option-wrapper.selected { border-color: var(--color-primary); background-color: #f0f9ff; font-weight: 500; }
+    .r-option-wrapper.is-correct {
+        border-color: var(--color-correct-border) !important; background-color: var(--color-correct-bg) !important;
+        box-shadow: inset 0 0 0 2px var(--color-correct-border) !important;
+    }
+    .r-option-wrapper.is-correct .r-item, .r-option-wrapper.is-correct .option-content, .r-option-wrapper.is-correct .char-interactive {
+        color: var(--color-correct) !important; font-weight: bold;
+    }
+    .r-option-wrapper.is-incorrect {
+        border-color: var(--color-incorrect-border) !important; background-color: var(--color-incorrect-bg) !important;
+        box-shadow: inset 0 0 0 1px var(--color-incorrect-border) !important;
+    }
+    .r-option-wrapper.is-incorrect .r-item, .r-option-wrapper.is-incorrect .option-content, .r-option-wrapper.is-incorrect .char-interactive {
+        color: var(--color-incorrect) !important; text-decoration: line-through; text-decoration-color: var(--color-incorrect);
+    }
+    .order-letter { font-weight: bold; color: inherit; font-size: 18px; }
+    .fill-blank-slot {
+        display: inline-block; min-width: 80px; height: 32px; border-bottom: 2px solid var(--color-primary);
+        text-align: center; color: var(--color-primary); font-weight: bold; font-size: 20px;
+        vertical-align: middle; cursor: pointer; background: #f0f9ff; transition: 0.2s;
+        border-radius: 4px 4px 0 0; padding: 0 6px;
+    }
+    .fill-blank-slot.is-correct { color: var(--color-correct) !important; border-color: var(--color-correct) !important; background-color: var(--color-correct-bg) !important; }
+    .fill-blank-slot.is-incorrect { color: var(--color-incorrect) !important; border-color: var(--color-incorrect) !important; background-color: var(--color-incorrect-bg) !important; }
+    .order-sequence {
+        display: flex; gap: 10px; margin-top: 15px; align-items: center; background: white;
+        padding: 10px; border-radius: 8px; border: 1px solid rgba(0, 0, 0, 0.1); flex-wrap: wrap;
+    }
+    .seq-box {
+        width: 45px; height: 45px; border: 2px dashed #94a3b8; border-radius: 6px;
+        display: flex; justify-content: center; align-items: center; font-size: 20px; font-weight: bold;
+        color: var(--color-primary); background: rgba(255, 255, 255, 0.8);
+    }
+    .seq-box.filled { border-style: solid; background: #e0f2fe; }
+    .seq-box.is-correct { border-style: solid; border-color: var(--color-correct); background: var(--color-correct-bg); color: var(--color-correct); }
+    .seq-box.is-incorrect { border-style: solid; border-color: var(--color-incorrect); background: var(--color-incorrect-bg); color: var(--color-incorrect); }
+    .btn-reset-small {
+        background: transparent; color: var(--text-muted); border: 1px solid #cbd5e1; font-size: 12px;
+        padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-left: 10px;
+    }
+    .btn-reset-small:hover { background: rgba(255, 255, 255, 0.9); color: var(--text-main); }
+    .writing-container { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
+    .q-image-box { text-align: center; margin: 10px 0 20px; }
+    .q-image-box img {
+        max-width: 100%; width: 420px; height: 240px; object-fit: cover; border-radius: 12px;
+        border: 3px solid white; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    }
+    .canvas-area {
+        border: 2px dashed var(--color-primary); border-radius: 8px; background: rgba(255, 255, 255, 0.85);
+        position: relative; height: 150px; width: 100%; max-width: 600px; margin: 0 auto;
+    }
+    canvas { width: 100%; height: 100%; cursor: crosshair; }
+    .canvas-tools { position: absolute; top: 5px; right: 5px; }
+    .btn-clear {
+        background: var(--color-incorrect-bg); color: #d00000; border: 1px solid #d00000;
+        padding: 4px 10px; border-radius: 4px; font-size: 12px; cursor: pointer; font-weight: bold;
+    }
+    .input-area { width: 100%; max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
+    .answer-input {
+        width: 100%; padding: 15px; font-size: 20px; border: 2px solid var(--glass-border);
+        border-radius: 8px; background: rgba(255, 255, 255, 0.95); color: var(--text-main); transition: 0.3s;
+    }
+    .answer-input:focus { outline: none; border-color: var(--color-primary); box-shadow: 0 0 10px rgba(2, 132, 199, 0.2); }
+    .answer-input.state-correct { border-color: var(--color-correct-border); background: var(--color-correct-bg); color: #1a635a; font-weight: bold; }
+    .answer-input.state-incorrect { border-color: var(--color-incorrect-border); background: var(--color-incorrect-bg); color: #7a1f26; }
+    .answer-input.state-close { border-color: var(--color-gold); background: rgba(217, 119, 6, 0.12); color: #8a5a00; font-weight: bold; }
+    .btn-check-main {
+        background: var(--color-jade); color: white; border: none; padding: 15px; border-radius: 8px;
+        font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s;
+        display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-check-main:hover:not(:disabled) { background: #047857; box-shadow: 0 4px 15px rgba(5, 150, 105, 0.4); transform: translateY(-2px); }
+    .btn-check-main:disabled { background: #cbd5e1; cursor: not-allowed; transform: none; box-shadow: none; }
+    .feedback-box { display: none; margin-top: 15px; padding: 15px; border-radius: 8px; background: rgba(255, 255, 255, 0.9); border-left: 4px solid var(--color-gold); }
+    .possible-ans-box { margin-top: 15px; padding: 15px; background: rgba(255, 255, 255, 0.8); border-radius: 8px; border-left: 4px solid var(--color-gold); }
+    .explanation-box {
+        background: #fffbeb; border: 1px solid #fcd34d; border-left: 4px solid #f59e0b; padding: 15px;
+        border-radius: 4px 8px 8px 4px; margin-bottom: 15px; display: none; line-height: 1.6;
+        font-size: 15px; color: #78350f; margin-top: 15px;
+    }
+    .explanation-box h4 { margin: 0 0 8px 0; color: #b45309; font-size: 16px; display: flex; align-items: center; gap: 6px; }
+    .support-controls {
+        display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; padding-top: 15px;
+        border-top: 1px solid var(--glass-border);
+    }
+    .support-btn {
+        background: white; color: var(--color-primary); border: 1px solid var(--color-primary-light);
+        padding: 10px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500;
+        transition: 0.2s; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); display: flex; align-items: center; gap: 6px;
+    }
+    .support-btn:hover { background: var(--color-primary-light); }
+    .support-btn.active { background: var(--color-primary); border-color: var(--color-primary); color: white; }
+    .btn-check { background: var(--color-primary); border-color: var(--color-primary); color: white; font-weight: bold; margin-left: auto; }
+    .btn-check:hover:not(:disabled) { background: var(--color-primary-hover); transform: translateY(-1px); }
+    .btn-check:disabled { opacity: 0.5; cursor: not-allowed; background: #cbd5e1; border-color: #cbd5e1; color: #64748b; transform: none; }
+    .btn-exp { background: #fffbeb; border-color: #fcd34d; color: #b45309; display: none; }
+    .btn-exp:hover { background: #fef3c7; }
+    .navigation {
+        display: flex; justify-content: space-between; align-items: center; margin-top: auto;
+        padding-top: 20px; border-top: 2px solid var(--glass-border); flex-wrap: wrap; gap: 10px; flex-shrink: 0;
+    }
+    .nav-btn {
+        background: white; border: 1px solid #cbd5e1; color: var(--text-muted); padding: 10px 20px;
+        border-radius: 20px; cursor: pointer; font-size: 14px; font-weight: 600; transition: 0.3s;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); display: flex; align-items: center; gap: 6px;
+    }
+    .nav-btn:hover:not(:disabled) { border-color: var(--color-primary); color: var(--color-primary); }
+    .nav-btn:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+    .nav-part-btn { background: var(--color-primary-light); border-color: var(--color-primary-light); color: var(--color-primary-hover); }
+    .nav-part-btn:hover:not(:disabled) { background: var(--color-primary); color: white; }
+    .section-container { height: 100%; justify-content: center; align-items: center; text-align: center; gap: 10px; }
+    .section-badge { font-size: 18px; color: var(--text-muted); font-weight: 600; letter-spacing: 2px; text-transform: uppercase; }
+    .section-big-icon { width: 120px; height: 120px; color: var(--color-primary); margin: 10px 0; }
+    .section-title-cn { font-size: 48px; color: var(--color-primary); font-weight: bold; margin: 0; }
+    .section-title-pt { font-size: 24px; color: var(--text-main); font-weight: 600; margin: 5px 0; }
+    .section-desc { font-size: 16px; color: var(--text-muted); max-width: 520px; line-height: 1.6; margin: 15px 0 25px; }
+    .section-prev-result {
+        background: white; border-radius: 12px; padding: 14px 22px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+        margin-bottom: 10px; font-size: 15px; color: var(--text-muted);
+    }
+    .section-prev-result strong { color: var(--color-jade); font-size: 18px; }
+    .results-summary {
+        background: white; border: 1px solid var(--glass-border); padding: 25px; border-radius: 12px;
+        text-align: center; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+    .results-score { font-size: 42px; color: var(--color-primary); font-weight: bold; margin: 10px 0; }
+    .results-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+    .result-item {
+        background: white; padding: 15px; border-radius: 8px; display: flex; justify-content: space-between;
+        align-items: center; border-left: 4px solid #cbd5e1; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+        flex-wrap: wrap; gap: 8px;
+    }
+    .result-item.correct { border-left-color: var(--color-correct); }
+    .result-item.incorrect { border-left-color: var(--color-incorrect); }
+    .result-item.unanswered { border-left-color: var(--color-gold); }
+    .result-item.close { border-left-color: var(--color-gold); }
+    .status-badge { display: flex; align-items: center; gap: 6px; font-size: 15px; font-weight: 500; }
+    .status-badge.correct { color: var(--color-correct); }
+    .status-badge.incorrect { color: var(--color-incorrect); }
+    .status-badge.unanswered { color: var(--color-gold); }
+    .status-badge.close { color: var(--color-gold); }
+    #tooltip {
+        position: fixed; background: rgba(15, 23, 42, 0.95); border: 1px solid #334155; padding: 15px;
+        border-radius: 12px; pointer-events: none; z-index: 1000; display: none;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); min-width: 160px; max-width: 300px;
+        backdrop-filter: blur(4px); color: white;
+    }
+    .tt-word { text-align: center; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #334155; }
+    .tt-pinyin { color: #38bdf8; font-size: 18px; font-weight: bold; margin-bottom: 4px; letter-spacing: 1px; }
+    .tt-trans { color: #fcd34d; font-size: 15px; font-weight: bold; }
+    .tt-chars { display: flex; flex-direction: column; gap: 6px; }
+    .tt-char-item { font-size: 13px; color: #e2e8f0; display: flex; gap: 8px; align-items: baseline; }
+    .tt-char-item strong { color: white; font-size: 16px; }
+    .tt-char-item span { color: #38bdf8; font-size: 12px; }
+    @media (max-width: 900px) {
+        .simulator-wrapper { flex-direction: column; height: 100vh; width: 100vw; border-radius: 0; border: none; }
+        .left-panel { width: 100% !important; flex-direction: row; padding: 15px 20px; border-right: none; border-bottom: 1px solid var(--glass-border); justify-content: flex-start; gap: 15px; }
+        .toggle-btn { display: none; }
+        .info-btn { top: 15px; left: auto; right: 20px; width: 35px; height: 35px; font-size: 16px; }
+        .svg-icon-main { width: 32px; height: 32px; margin-bottom: 0; }
+        .left-panel.collapsed .test-info { opacity: 1; visibility: visible; position: static; pointer-events: auto; }
+        .test-info { text-align: left; margin-bottom: 0; }
+        .section-tracker, .audio-instruction { display: none; }
+        .right-panel { flex: 1; padding: 20px; }
+        .options-container.tf-mode { gap: 15px; justify-content: center; }
+        .option-btn.tf-btn { width: 70px; height: 70px; font-size: 30px; }
+        .btn-check { margin-left: 0; width: 100%; margin-top: 8px; }
+        .navigation { justify-content: center; }
+        .section-title-cn { font-size: 36px; }
+    }
+    </style>
+</head>
+<body>
+    <button class="info-btn" id="btn-info" title="Informações">i</button>
+    <div class="simulator-wrapper">
+        <div class="left-panel" id="left-panel">
+            <button class="toggle-btn" id="btn-toggle-panel" title="Expandir/Recolher">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+            </button>
+            <svg class="svg-icon-main" id="panel-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 18v-6a9 9 0 0 1 18 0v6"></path>
+                <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path>
+            </svg>
+            <div class="test-info">
+                <div class="chinese-text" id="title-main"></div>
+                <div class="lesson-sub" id="title-sub"></div>
+            </div>
+            <div class="section-tracker" id="section-tracker"></div>
+            <div class="audio-instruction" id="audio-instruction">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                    <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                </svg>
+                <span id="audio-instruction-text">Ouça ao áudio</span>
+            </div>
+        </div>
+        <div class="right-panel" id="interaction-area">
+            <div class="header-bar">
+                <div class="progress-indicator" id="progress-text"></div>
+                <div class="part-indicator" id="part-text"></div>
+            </div>
+            <div class="section-container" id="section-screen">
+                <div class="section-badge" id="section-badge"></div>
+                <div id="section-icon-holder"></div>
+                <h1 class="section-title-cn" id="section-title-cn"></h1>
+                <div class="section-title-pt" id="section-title-pt"></div>
+                <div class="section-prev-result" id="section-prev-result" style="display:none;"></div>
+                <div class="section-desc" id="section-desc"></div>
+                <button class="btn-start-part" id="btn-start-section">
+                    Iniciar
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="intro-container" id="intro-screen">
+                <div class="intro-title chinese-text" id="intro-title-text"></div>
+                <div class="pinyin-display" id="intro-title-pinyin"></div>
+                <div class="intro-instructions chinese-text" style="font-size:20px;" id="intro-instructions-text"></div>
+                <div class="pinyin-display" id="intro-instructions-pinyin"></div>
+                <div id="intro-examples-area"></div>
+                <button class="btn-start-part" id="btn-start-part">
+                    Começar Exercícios
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="question-container" id="question-screen">
+                <div class="instruction-block" id="instruction-block">
+                    <div class="text-block-header">
+                        <div class="text-label">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>
+                            </svg>
+                            Instrução
+                        </div>
+                        <div class="action-buttons-group">
+                            <button class="btn-translate-inline" onclick="toggleDisp('instruction-pinyin')">拼 Pinyin</button>
+                            <button class="btn-translate-inline" onclick="toggleDisp('instruction-trans')">A/文 Tradução</button>
+                        </div>
+                    </div>
+                    <div class="chinese-text" style="font-size:20px;" id="instruction-chars"></div>
+                    <div class="pinyin-display" id="instruction-pinyin"></div>
+                    <div class="translation-display" id="instruction-trans"></div>
+                </div>
+                <div class="text-block" id="script-block" style="display:none;">
+                    <div class="text-block-header">
+                        <div class="text-label">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                            </svg>
+                            <span id="script-label-text">Texto do Áudio</span>
+                        </div>
+                        <div class="action-buttons-group">
+                            <button class="btn-translate-inline" onclick="toggleDisp('script-pinyin')">拼 Pinyin</button>
+                            <button class="btn-translate-inline" onclick="toggleDisp('script-trans')">A/文 Tradução</button>
+                        </div>
+                    </div>
+                    <div class="chinese-text" id="script-chars"></div>
+                    <div class="pinyin-display" id="script-pinyin"></div>
+                    <div class="translation-display" id="script-trans"></div>
+                </div>
+                <div class="text-block" id="question-block">
+                    <div class="text-block-header">
+                        <div class="text-label" id="question-label-holder">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>
+                            </svg>
+                            <span id="question-label-text">Questão / Afirmação</span>
+                        </div>
+                        <div class="action-buttons-group">
+                            <button class="btn-translate-inline" onclick="toggleDisp('question-pinyin')">拼 Pinyin</button>
+                            <button class="btn-translate-inline" onclick="toggleDisp('question-trans')">A/文 Tradução</button>
+                        </div>
+                    </div>
+                    <div class="chinese-text" id="question-chars"></div>
+                    <div class="pinyin-display" id="question-pinyin"></div>
+                    <div class="translation-display" id="question-trans"></div>
+                </div>
+                <div id="options-wrapper-area">
+                    <div class="text-block-header" style="margin-bottom:12px;">
+                        <div class="text-label">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+                            </svg>
+                            <span id="options-label-text">Opções</span>
+                        </div>
+                    </div>
+                    <div class="options-container" id="options-area"></div>
+                </div>
+                <div id="writing-area"></div>
+                <div class="explanation-box" id="explanation-display"></div>
+                <div class="support-controls" id="support-controls"></div>
+            </div>
+            <div class="results-container" id="results-screen">
+                <h2 class="chinese-text" id="results-heading" style="color:var(--color-primary);text-align:center;font-size:28px;font-weight:bold;">Resultado</h2>
+                <div class="results-summary">
+                    <div style="font-size:16px;color:var(--text-muted);font-weight:600;" id="results-caption">Você acertou</div>
+                    <div class="results-score" id="results-score-text">0 / 0</div>
+                    <div style="font-size:14px;color:var(--text-muted);" id="results-percentage">0%</div>
+                </div>
+                <div class="text-label" style="margin-bottom:8px;">Resumo das Questões</div>
+                <div class="results-list" id="results-list"></div>
+                <button class="btn-start-part" id="btn-after-results" style="margin-top:10px;"></button>
+            </div>
+            <div class="navigation" id="navigation-bar" style="display:none;">
+                <button class="nav-btn nav-part-btn" id="btn-prev-part">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m11 17-5-5 5-5"/><path d="m18 17-5-5 5-5"/>
+                    </svg>
+                    Parte Anterior
+                </button>
+                <button class="nav-btn" id="btn-prev">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m15 18-6-6 6-6"/>
+                    </svg>
+                    Anterior
+                </button>
+                <button class="nav-btn" id="btn-next">
+                    Próximo
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m9 18 6-6-6-6"/>
+                    </svg>
+                </button>
+                <button class="nav-btn nav-part-btn" id="btn-next-part">
+                    Próxima Parte
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m13 17 5-5-5-5"/><path d="m6 17 5-5-5-5"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="modal-overlay" id="info-modal">
+        <div class="modal-content">
+            <h2>Instruções de Interatividade</h2>
+            <p>Simulador completo do HSK 4 — Lição 6 (听力 · 阅读 · 书写):</p>
+            <ul>
+                <li><strong>Clique Esquerdo no Caractere:</strong> exibe a palavra (Pinyin + Tradução) e a tradução de cada caractere individual.</li>
+                <li><strong>Clique Direito no Caractere:</strong> oculta o Pinyin e mostra apenas a tradução, para treinar leitura sem apoio fonético.</li>
+                <li><strong>Botões 拼 Pinyin / A/文 Tradução:</strong> revelam o pinyin e a tradução de cada frase, texto ou opção.</li>
+                <li><strong>Três testes em sequência:</strong> ao terminar cada teste você vê o gabarito e, em seguida, a tela de início do próximo teste.</li>
+            </ul>
+            <button class="close-modal-btn" id="btn-close-modal">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 6 9 17l-5-5"/>
+                </svg>
+                Entendi, começar!
+            </button>
+        </div>
+    </div>
+    <div id="tooltip">
+        <div class="tt-word">
+            <div class="tt-pinyin" id="tt-pinyin-text"></div>
+            <div class="tt-trans" id="tt-trans-text"></div>
+        </div>
+        <div class="tt-chars" id="tt-chars-breakdown"></div>
+    </div>
+    <script>
+/* ===================== DICTIONARIES (Lição 6) ===================== */
+const wordsDict = {
+    "一分钱一分货": { p: "yì fēn qián yì fēn huò", t: "você recebe pelo que paga" },
+    "信用卡": { p: "xìnyòngkǎ", t: "cartão de crédito" },
+    "今天": { p: "jīntiān", t: "hoje" },
+    "下午": { p: "xiàwǔ", t: "à tarde" },
+    "时间": { p: "shíjiān", t: "tempo" },
+    "银行": { p: "yínháng", t: "banco" },
+    "打算": { p: "dǎsuàn", t: "planejar" },
+    "现在": { p: "xiànzài", t: "agora" },
+    "电视": { p: "diànshì", t: "televisão" },
+    "原因": { p: "yuányīn", t: "motivo/razão" },
+    "广告": { p: "guǎnggào", t: "anúncio/comercial" },
+    "不管": { p: "bùguǎn", t: "não importa" },
+    "节目": { p: "jiémù", t: "programa" },
+    "只要": { p: "zhǐyào", t: "contanto que/basta" },
+    "打开": { p: "dǎkāi", t: "ligar/abrir" },
+    "浪费": { p: "làngfèi", t: "desperdiçar" },
+    "喜欢": { p: "xǐhuan", t: "gostar" },
+    "对不起": { p: "duìbuqǐ", t: "desculpe" },
+    "先生": { p: "xiānsheng", t: "senhor" },
+    "蛋糕": { p: "dàngāo", t: "bolo" },
+    "已经": { p: "yǐjīng", t: "já" },
+    "卖完": { p: "màiwán", t: "esgotar (vender tudo)" },
+    "不过": { p: "búguò", t: "no entanto/mas" },
+    "面包": { p: "miànbāo", t: "pão" },
+    "味道": { p: "wèidào", t: "sabor" },
+    "不错": { p: "búcuò", t: "nada mau/bom" },
+    "顺便": { p: "shùnbiàn", t: "de passagem/aproveitar" },
+    "超市": { p: "chāoshì", t: "supermercado" },
+    "香蕉": { p: "xiāngjiāo", t: "banana" },
+    "苹果": { p: "píngguǒ", t: "maçã" },
+    "西红柿": { p: "xīhóngshì", t: "tomate" },
+    "招聘会": { p: "zhāopìnhuì", t: "feira de empregos" },
+    "参加": { p: "cānjiā", t: "participar" },
+    "适合": { p: "shìhé", t: "combinar/adequar-se" },
+    "正式": { p: "zhèngshì", t: "formal" },
+    "试衣间": { p: "shìyījiān", t: "provador" },
+    "试一试": { p: "shì yi shì", t: "experimentar" },
+    "房子": { p: "fángzi", t: "casa" },
+    "值得": { p: "zhídé", t: "valer a pena" },
+    "认真": { p: "rènzhēn", t: "sério/dedicado" },
+    "考虑": { p: "kǎolǜ", t: "considerar" },
+    "问题": { p: "wèntí", t: "problema/questão" },
+    "房价": { p: "fángjià", t: "preço de imóvel" },
+    "将来": { p: "jiānglái", t: "no futuro" },
+    "可能": { p: "kěnéng", t: "talvez/possível" },
+    "降下来": { p: "jiàng xiàlái", t: "cair (baixar)" },
+    "更高": { p: "gèng gāo", t: "mais alto" },
+    "电脑": { p: "diànnǎo", t: "computador" },
+    "太旧": { p: "tài jiù", t: "velho demais" },
+    "正好": { p: "zhènghǎo", t: "por coincidência/na hora certa" },
+    "公司": { p: "gōngsī", t: "empresa" },
+    "奖金": { p: "jiǎngjīn", t: "bônus/prêmio" },
+    "星期天": { p: "xīngqītiān", t: "domingo" },
+    "同意": { p: "tóngyì", t: "concordar" },
+    "上海": { p: "Shànghǎi", t: "Xangai" },
+    "旅游": { p: "lǚyóu", t: "viajar/turismo" },
+    "行李箱": { p: "xínglǐxiāng", t: "mala de viagem" },
+    "请假": { p: "qǐngjià", t: "pedir folga/licença" },
+    "唱歌": { p: "chànggē", t: "cantar" },
+    "散步": { p: "sànbù", t: "passear/caminhar" },
+    "东西": { p: "dōngxi", t: "coisa" },
+    "买东西": { p: "mǎi dōngxi", t: "comprar coisas" },
+    "衬衫": { p: "chènshān", t: "camisa" },
+    "裤子": { p: "kùzi", t: "calça" },
+    "打折": { p: "dǎzhé", t: "dar desconto" },
+    "需要": { p: "xūyào", t: "precisar" },
+    "蓝色": { p: "lánsè", t: "azul" },
+    "老师": { p: "lǎoshī", t: "professor" },
+    "售货员": { p: "shòuhuòyuán", t: "vendedor(a)" },
+    "律师": { p: "lǜshī", t: "advogado" },
+    "出租车": { p: "chūzūchē", t: "táxi" },
+    "司机": { p: "sījī", t: "motorista" },
+    "出租车司机": { p: "chūzūchē sījī", t: "motorista de táxi" },
+    "沙发": { p: "shāfā", t: "sofá" },
+    "免费": { p: "miǎnfèi", t: "gratuito" },
+    "送货上门": { p: "sòng huò shàngmén", t: "entrega em domicílio" },
+    "送货": { p: "sòng huò", t: "entregar mercadoria" },
+    "电话": { p: "diànhuà", t: "telefone" },
+    "三日内": { p: "sān rì nèi", t: "em até três dias" },
+    "送到": { p: "sòng dào", t: "entregar (chegar)" },
+    "家具店": { p: "jiājùdiàn", t: "loja de móveis" },
+    "家具": { p: "jiājù", t: "móveis" },
+    "体育馆": { p: "tǐyùguǎn", t: "ginásio" },
+    "图书馆": { p: "túshūguǎn", t: "biblioteca" },
+    "洗手间": { p: "xǐshǒujiān", t: "banheiro" },
+    "一共": { p: "yígòng", t: "no total" },
+    "多少钱": { p: "duōshǎo qián", t: "quanto custa" },
+    "葡萄": { p: "pútao", t: "uva" },
+    "原价": { p: "yuánjià", t: "preço original" },
+    "便宜": { p: "piányi", t: "barato" },
+    "下班": { p: "xiàbān", t: "sair do trabalho" },
+    "逛街": { p: "guàngjiē", t: "passear/fazer compras" },
+    "最近": { p: "zuìjìn", t: "recentemente" },
+    "许多": { p: "xǔduō", t: "muitos" },
+    "商场": { p: "shāngchǎng", t: "shopping/centro comercial" },
+    "裙子": { p: "qúnzi", t: "saia" },
+    "加班": { p: "jiābān", t: "fazer hora extra" },
+    "星期六": { p: "xīngqīliù", t: "sábado" },
+    "打球": { p: "dǎqiú", t: "jogar bola" },
+    "礼物": { p: "lǐwù", t: "presente" },
+    "母亲节": { p: "mǔqīnjié", t: "Dia das Mães" },
+    "商店": { p: "shāngdiàn", t: "loja" },
+    "衣服": { p: "yīfu", t: "roupa" },
+    "做生意": { p: "zuò shēngyi", t: "fazer negócios" },
+    "又高又瘦": { p: "yòu gāo yòu shòu", t: "alta e magra" },
+    "漂亮": { p: "piàoliang", t: "bonito" },
+    "颜色": { p: "yánsè", t: "cor" },
+    "黄色": { p: "huángsè", t: "amarelo" },
+    "比较": { p: "bǐjiào", t: "comparar/relativamente" },
+    "休息": { p: "xiūxi", t: "descansar/folga" },
+    "外地": { p: "wàidì", t: "fora da cidade" },
+    "比赛": { p: "bǐsài", t: "competição" },
+    "运动员": { p: "yùndòngyuán", t: "atleta" },
+    "医生": { p: "yīshēng", t: "médico" },
+    "大衣": { p: "dàyī", t: "sobretudo/casaco" },
+    "果汁": { p: "guǒzhī", t: "suco" },
+    "牛奶": { p: "niúnǎi", t: "leite" },
+    "楼下": { p: "lóuxià", t: "andar de baixo" },
+    "马上": { p: "mǎshàng", t: "logo/imediatamente" },
+    "天气": { p: "tiānqì", t: "tempo/clima" },
+    "电梯": { p: "diàntī", t: "elevador" },
+    "上网": { p: "shàngwǎng", t: "acessar a internet" },
+    "笔记本电脑": { p: "bǐjìběn diànnǎo", t: "notebook" },
+    "特别": { p: "tèbié", t: "especialmente" },
+    "好用": { p: "hǎoyòng", t: "bom de usar" },
+    "面条": { p: "miàntiáo", t: "macarrão" },
+    "鸡蛋": { p: "jīdàn", t: "ovo" },
+    "冰箱": { p: "bīngxiāng", t: "geladeira" },
+    "好像": { p: "hǎoxiàng", t: "parecer" },
+    "皮肤": { p: "pífū", t: "pele" },
+    "中号": { p: "zhōnghào", t: "tamanho médio (M)" },
+    "红色": { p: "hóngsè", t: "vermelho" },
+    "黑色": { p: "hēisè", t: "preto" },
+    "满意": { p: "mǎnyì", t: "satisfeito" },
+    "放心": { p: "fàngxīn", t: "ficar tranquilo" },
+    "洗衣机": { p: "xǐyījī", t: "máquina de lavar" },
+    "购买": { p: "gòumǎi", t: "comprar" },
+    "质量": { p: "zhìliàng", t: "qualidade" },
+    "修理": { p: "xiūlǐ", t: "consertar" },
+    "保修卡": { p: "bǎoxiūkǎ", t: "cartão de garantia" },
+    "保修期": { p: "bǎoxiūqī", t: "período de garantia" },
+    "使用": { p: "shǐyòng", t: "usar" },
+    "遇到": { p: "yùdào", t: "encontrar/deparar" },
+    "联系": { p: "liánxì", t: "contatar" },
+    "空调": { p: "kōngtiáo", t: "ar-condicionado" },
+    "同事": { p: "tóngshì", t: "colega de trabalho" },
+    "终于": { p: "zhōngyú", t: "finalmente" },
+    "帅哥": { p: "shuàigē", t: "rapaz bonito" },
+    "客气": { p: "kèqi", t: "educado/cortês" },
+    "礼貌": { p: "lǐmào", t: "boas maneiras" },
+    "有礼貌": { p: "yǒu lǐmào", t: "educado" },
+    "高兴": { p: "gāoxìng", t: "feliz" },
+    "难过": { p: "nánguò", t: "triste" },
+    "感兴趣": { p: "gǎn xìngqù", t: "ter interesse" },
+    "顾客": { p: "gùkè", t: "cliente" },
+    "情况": { p: "qíngkuàng", t: "situação" },
+    "获得": { p: "huòdé", t: "obter/conseguir" },
+    "举办": { p: "jǔbàn", t: "realizar/organizar" },
+    "坚持": { p: "jiānchí", t: "insistir/persistir" },
+    "所有": { p: "suǒyǒu", t: "todos/tudo" },
+    "要求": { p: "yāoqiú", t: "exigência" },
+    "接受": { p: "jiēshòu", t: "aceitar" },
+    "成功": { p: "chénggōng", t: "sucesso" },
+    "安排": { p: "ānpái", t: "organizar/arranjar" },
+    "调查": { p: "diàochá", t: "investigar" },
+    "重要": { p: "zhòngyào", t: "importante" },
+    "丰富": { p: "fēngfù", t: "enriquecer/rico" },
+    "学生": { p: "xuésheng", t: "estudante" },
+    "生活": { p: "shēnghuó", t: "vida/viver" },
+    "学校": { p: "xuéxiào", t: "escola" },
+    "经常": { p: "jīngcháng", t: "frequentemente" },
+    "支持": { p: "zhīchí", t: "apoio/apoiar" },
+    "方面": { p: "fāngmiàn", t: "aspecto/área" },
+    "温度": { p: "wēndù", t: "temperatura" },
+    "竟然": { p: "jìngrán", t: "inesperadamente" },
+    "小说": { p: "xiǎoshuō", t: "romance/livro" },
+    "完全": { p: "wánquán", t: "totalmente" },
+    "一样": { p: "yíyàng", t: "igual/mesmo" },
+    "去年": { p: "qùnián", t: "ano passado" },
+    "夏天": { p: "xiàtiān", t: "verão" },
+    "有意思": { p: "yǒu yìsi", t: "interessante" },
+    "差不多": { p: "chàbuduō", t: "quase/mais ou menos" },
+    "明天": { p: "míngtiān", t: "amanhã" },
+    "后天": { p: "hòutiān", t: "depois de amanhã" },
+    "见面": { p: "jiànmiàn", t: "encontrar-se" },
+    "着急": { p: "zháojí", t: "ter pressa/ansioso" },
+    "周末": { p: "zhōumò", t: "fim de semana" },
+    "教授": { p: "jiàoshòu", t: "professor (catedrático)" },
+    "感谢": { p: "gǎnxiè", t: "agradecer" },
+    "工作": { p: "gōngzuò", t: "trabalho" },
+    "应该": { p: "yīnggāi", t: "dever/deveria" },
+    "法律": { p: "fǎlǜ", t: "lei/jurídico" },
+    "手机": { p: "shǒujī", t: "celular" },
+    "直接": { p: "zhíjiē", t: "diretamente" },
+    "流行": { p: "liúxíng", t: "estar na moda" },
+    "两倍": { p: "liǎng bèi", t: "o dobro" },
+    "大学": { p: "dàxué", t: "faculdade/universidade" },
+    "同学": { p: "tóngxué", t: "colega de classe" },
+    "毕业": { p: "bìyè", t: "formar-se" },
+    "护照": { p: "hùzhào", t: "passaporte" },
+    "脾气": { p: "píqi", t: "temperamento" },
+    "诚实": { p: "chéngshí", t: "honesto" },
+    "相信": { p: "xiāngxìn", t: "confiar/acreditar" },
+    "交流": { p: "jiāoliú", t: "comunicar-se" },
+    "及时": { p: "jíshí", t: "a tempo/oportuno" },
+    "关系": { p: "guānxi", t: "relação/relacionamento" },
+    "越来越": { p: "yuè lái yuè", t: "cada vez mais" },
+    "实际上": { p: "shíjìshang", t: "na verdade" },
+    "热情": { p: "rèqíng", t: "entusiasmado/caloroso" },
+    "介绍": { p: "jièshào", t: "apresentar/introduzir" },
+    "舒服": { p: "shūfu", t: "confortável" },
+    "打扰": { p: "dǎrǎo", t: "incomodar" },
+    "愿意": { p: "yuànyì", t: "estar disposto" },
+    "货物": { p: "huòwù", t: "mercadoria" },
+    "价格": { p: "jiàgé", t: "preço" },
+    "好货": { p: "hǎo huò", t: "boa mercadoria" },
+    "换季": { p: "huànjì", t: "mudança de estação" },
+    "节假日": { p: "jiéjiàrì", t: "feriado" },
+    "各大": { p: "gè dà", t: "os grandes/vários" },
+    "活动": { p: "huódòng", t: "atividade/evento" },
+    "吸引": { p: "xīyǐn", t: "atrair" },
+    "一半": { p: "yíbàn", t: "metade" },
+    "平时": { p: "píngshí", t: "normalmente" },
+    "甚至": { p: "shènzhì", t: "até mesmo" },
+    "检查": { p: "jiǎnchá", t: "inspecionar/verificar" },
+    "服务": { p: "fúwù", t: "serviço" },
+    "水平": { p: "shuǐpíng", t: "nível" },
+    "提高": { p: "tígāo", t: "elevar/melhorar" },
+    "星期": { p: "xīngqī", t: "semana" },
+    "任何": { p: "rènhé", t: "qualquer" },
+    "购物": { p: "gòuwù", t: "fazer compras" },
+    "购物小票": { p: "gòuwù xiǎopiào", t: "recibo de compra" },
+    "小票": { p: "xiǎopiào", t: "recibo/nota" },
+    "一定": { p: "yídìng", t: "com certeza/necessariamente" },
+    "没法": { p: "méifǎ", t: "não ter jeito/como" },
+    "提醒": { p: "tíxǐng", t: "lembrar/avisar" },
+    "以内": { p: "yǐnèi", t: "dentro de" },
+    "绿色食品": { p: "lǜsè shípǐn", t: "alimento orgânico" },
+    "绿色": { p: "lǜsè", t: "verde" },
+    "食品": { p: "shípǐn", t: "alimento" },
+    "不仅": { p: "bùjǐn", t: "não apenas" },
+    "好吃": { p: "hǎochī", t: "saboroso" },
+    "而且": { p: "érqiě", t: "além disso" },
+    "身体": { p: "shēntǐ", t: "corpo/saúde" },
+    "好处": { p: "hǎochù", t: "benefício" },
+    "其他": { p: "qítā", t: "outros" },
+    "特点": { p: "tèdiǎn", t: "característica" },
+    "干净": { p: "gānjìng", t: "limpo" },
+    "朋友": { p: "péngyou", t: "amigo" },
+    "举行": { p: "jǔxíng", t: "realizar" },
+    "可乐": { p: "kělè", t: "coca-cola" },
+    "葡萄酒": { p: "pútaojiǔ", t: "vinho" },
+    "另外": { p: "lìngwài", t: "além disso" },
+    "水果": { p: "shuǐguǒ", t: "fruta" },
+    "其中": { p: "qízhōng", t: "dentre os quais" },
+    "西瓜": { p: "xīguā", t: "melancia" },
+    "欢迎": { p: "huānyíng", t: "dar boas-vindas" },
+    "选购": { p: "xuǎngòu", t: "escolher e comprar" },
+    "愉快": { p: "yúkuài", t: "agradável/feliz" },
+    "半价": { p: "bànjià", t: "metade do preço" },
+    "饮料": { p: "yǐnliào", t: "bebida" },
+    "环境": { p: "huánjìng", t: "ambiente" },
+    "主要": { p: "zhǔyào", t: "principalmente" },
+    "即使": { p: "jíshǐ", t: "mesmo que" },
+    "大家": { p: "dàjiā", t: "todos" },
+    "说明": { p: "shuōmíng", t: "explicar" },
+    "相同": { p: "xiāngtóng", t: "idêntico/igual" },
+    "试用": { p: "shìyòng", t: "teste/experimentar" },
+    "袜子": { p: "wàzi", t: "meias" },
+    "弟弟": { p: "dìdi", t: "irmão mais novo" },
+    "瓶子": { p: "píngzi", t: "garrafa" },
+    "满了": { p: "mǎn le", t: "cheio/encheu" },
+    "火车": { p: "huǒchē", t: "trem" },
+    "火车上": { p: "huǒchē shang", t: "no trem" },
+    "提供": { p: "tígōng", t: "fornecer" },
+    "电影": { p: "diànyǐng", t: "filme/cinema" },
+    "艺术节": { p: "yìshùjié", t: "festival de arte" },
+    "电影艺术节": { p: "diànyǐng yìshùjié", t: "festival de arte cinematográfica" },
+    "北京": { p: "Běijīng", t: "Pequim" },
+    "理解": { p: "lǐjiě", t: "compreender" },
+    "尝": { p: "cháng", t: "provar/experimentar" },
+    "尝一下": { p: "cháng yíxià", t: "provar um pouco" },
+    "菜": { p: "cài", t: "prato/comida" },
+    "带回去": { p: "dài huíqù", t: "levar de volta" },
+    "自己": { p: "zìjǐ", t: "si mesmo" },
+    "答案": { p: "dá'àn", t: "resposta" },
+    "正确": { p: "zhèngquè", t: "correto" },
+    "选出": { p: "xuǎnchū", t: "selecionar" },
+    "判断": { p: "pànduàn", t: "julgar" },
+    "对错": { p: "duìcuò", t: "certo ou errado" },
+    "选词填空": { p: "xuǎn cí tiánkòng", t: "escolher palavra e preencher lacuna" },
+    "填空": { p: "tiánkòng", t: "preencher lacuna" },
+    "排列": { p: "páiliè", t: "ordenar" },
+    "顺序": { p: "shùnxù", t: "ordem" },
+    "完成": { p: "wánchéng", t: "completar" },
+    "句子": { p: "jùzi", t: "frase" },
+    "造句": { p: "zàojù", t: "criar frase" },
+    "根据": { p: "gēnjù", t: "de acordo com" },
+    "下列": { p: "xiàliè", t: "a seguir" },
+    "关于": { p: "guānyú", t: "sobre/a respeito de" },
+    "知道": { p: "zhīdào", t: "saber" },
+    "为什么": { p: "wèishénme", t: "por quê" },
+    "意思": { p: "yìsi", t: "significado/sentido" },
+    "干什么": { p: "gàn shénme", t: "fazer o quê" },
+    "怎么样": { p: "zěnmeyàng", t: "que tal/como está" },
+    "怎么办": { p: "zěnme bàn", t: "o que fazer" },
+    "没问题": { p: "méi wèntí", t: "sem problema" },
+    "没关系": { p: "méi guānxi", t: "não tem problema" },
+    "乒乓球": { p: "pīngpāngqiú", t: "pingue-pongue" },
+    "那座桥": { p: "nà zuò qiáo", t: "aquela ponte" },
+    "历史": { p: "lìshǐ", t: "história" }
+};
+const charDict = {
+    "我": { p: "wǒ", t: "eu" }, "你": { p: "nǐ", t: "você" }, "他": { p: "tā", t: "ele" },
+    "她": { p: "tā", t: "ela" }, "们": { p: "men", t: "(plural)" }, "是": { p: "shì", t: "ser" },
+    "的": { p: "de", t: "(possessivo)" }, "了": { p: "le", t: "(partícula)" }, "在": { p: "zài", t: "em/estar" },
+    "不": { p: "bù", t: "não" }, "和": { p: "hé", t: "e/com" }, "也": { p: "yě", t: "também" },
+    "都": { p: "dōu", t: "todos" }, "很": { p: "hěn", t: "muito" }, "去": { p: "qù", t: "ir" },
+    "来": { p: "lái", t: "vir" }, "个": { p: "gè", t: "(classificador)" }, "这": { p: "zhè", t: "este" },
+    "那": { p: "nà", t: "aquele" }, "有": { p: "yǒu", t: "ter/haver" }, "想": { p: "xiǎng", t: "querer/pensar" },
+    "陪": { p: "péi", t: "acompanhar" }, "趟": { p: "tàng", t: "(vez/viagem)" }, "少": { p: "shǎo", t: "pouco" },
+    "看": { p: "kàn", t: "ver/olhar" }, "太": { p: "tài", t: "demais" }, "多": { p: "duō", t: "muito" },
+    "能": { p: "néng", t: "poder" }, "总": { p: "zǒng", t: "sempre" }, "小": { p: "xiǎo", t: "pequeno" },
+    "王": { p: "wáng", t: "Wang" }, "买": { p: "mǎi", t: "comprar" }, "卖": { p: "mài", t: "vender" },
+    "就": { p: "jiù", t: "então/já" }, "做": { p: "zuò", t: "fazer" }, "把": { p: "bǎ", t: "(part. 把)" },
+    "给": { p: "gěi", t: "dar/para" }, "再": { p: "zài", t: "de novo/mais" }, "要": { p: "yào", t: "querer/precisar" },
+    "用": { p: "yòng", t: "usar" }, "李": { p: "lǐ", t: "Li" }, "两": { p: "liǎng", t: "dois" },
+    "天": { p: "tiān", t: "dia/céu" }, "您": { p: "nín", t: "o senhor" }, "什": { p: "shén", t: "(o quê)" },
+    "么": { p: "me", t: "(sufixo)" }, "找": { p: "zhǎo", t: "procurar" }, "打": { p: "dǎ", t: "bater/ligar" },
+    "点": { p: "diǎn", t: "hora/ponto" }, "到": { p: "dào", t: "chegar" }, "票": { p: "piào", t: "bilhete" },
+    "还": { p: "hái", t: "ainda" }, "请": { p: "qǐng", t: "por favor/convidar" }, "半": { p: "bàn", t: "metade" },
+    "为": { p: "wèi", t: "para" }, "对": { p: "duì", t: "correto/certo" }, "新": { p: "xīn", t: "novo" },
+    "快": { p: "kuài", t: "rápido" }, "学": { p: "xué", t: "estudar" }, "上": { p: "shàng", t: "em cima/subir" },
+    "下": { p: "xià", t: "embaixo/descer" }, "面": { p: "miàn", t: "face/lado" }, "次": { p: "cì", t: "vez" },
+    "马": { p: "mǎ", t: "Ma/cavalo" }, "试": { p: "shì", t: "provar/tentar" }, "谁": { p: "shéi", t: "quem" },
+    "事": { p: "shì", t: "assunto" }, "成": { p: "chéng", t: "tornar-se" }, "换": { p: "huàn", t: "trocar" },
+    "高": { p: "gāo", t: "alto" }, "出": { p: "chū", t: "sair/ocorrer" }, "些": { p: "xiē", t: "alguns" },
+    "变": { p: "biàn", t: "mudar" }, "回": { p: "huí", t: "voltar" }, "说": { p: "shuō", t: "dizer" },
+    "让": { p: "ràng", t: "deixar/fazer" }, "好": { p: "hǎo", t: "bom" }, "问": { p: "wèn", t: "perguntar" },
+    "答": { p: "dá", t: "responder" }, "案": { p: "àn", t: "caso/resposta" }, "先": { p: "xiān", t: "primeiro" },
+    "知": { p: "zhī", t: "saber" }, "钱": { p: "qián", t: "dinheiro" }, "名": { p: "míng", t: "nome" },
+    "如": { p: "rú", t: "como/se" }, "例": { p: "lì", t: "exemplo" }, "中": { p: "zhōng", t: "meio/dentro" },
+    "早": { p: "zǎo", t: "cedo" }, "纸": { p: "zhǐ", t: "papel" }, "画": { p: "huà", t: "desenhar/pintura" },
+    "比": { p: "bǐ", t: "comparar/do que" }, "更": { p: "gèng", t: "mais/ainda" }, "被": { p: "bèi", t: "(voz passiva)" },
+    "座": { p: "zuò", t: "(classificador)" }, "年": { p: "nián", t: "ano" }, "台": { p: "tái", t: "(classif. máquina)" },
+    "条": { p: "tiáo", t: "(classif. longo)" }, "件": { p: "jiàn", t: "(classif. peça)" }, "张": { p: "zhāng", t: "(classif. plano)" },
+    "双": { p: "shuāng", t: "par" }, "种": { p: "zhǒng", t: "tipo" }, "块": { p: "kuài", t: "yuan (moeda)" },
+    "元": { p: "yuán", t: "yuan" }, "米": { p: "mǐ", t: "metro" }, "咱": { p: "zán", t: "nós" },
+    "拿": { p: "ná", t: "pegar" }, "辆": { p: "liàng", t: "(classif. veículo)" }, "挺": { p: "tǐng", t: "bastante" },
+    "穿": { p: "chuān", t: "vestir" }, "又": { p: "yòu", t: "de novo/e" }, "颜": { p: "yán", t: "cor" },
+    "孙": { p: "sūn", t: "Sun" }, "妈": { p: "mā", t: "mãe" }, "交": { p: "jiāo", t: "pagar/entregar" },
+    "别": { p: "bié", t: "não/outro" }, "迟": { p: "chí", t: "atrasado" }, "刷": { p: "shuā", t: "passar/escovar" },
+    "卡": { p: "kǎ", t: "cartão" }, "够": { p: "gòu", t: "suficiente" }, "份": { p: "fèn", t: "(classif. documento)" },
+    "改": { p: "gǎi", t: "mudar/corrigir" }, "室": { p: "shì", t: "sala/cômodo" }, "层": { p: "céng", t: "andar" },
+    "旧": { p: "jiù", t: "velho/usado" }, "行": { p: "xíng", t: "ok/andar" }, "空": { p: "kòng", t: "tempo livre" },
+    "呀": { p: "ya", t: "(partícula)" }, "红": { p: "hóng", t: "vermelho" }, "草": { p: "cǎo", t: "grama" },
+    "受": { p: "shòu", t: "receber" }, "鞋": { p: "xié", t: "sapato" }, "累": { p: "lèi", t: "cansado" },
+    "留": { p: "liú", t: "guardar/deixar" }, "付": { p: "fù", t: "pagar" }, "转": { p: "zhuǎn", t: "virar" },
+    "头": { p: "tóu", t: "cabeça/fim" }, "坏": { p: "huài", t: "quebrado/estragado" }, "机": { p: "jī", t: "máquina" },
+    "钟": { p: "zhōng", t: "relógio/hora" }, "瓶": { p: "píng", t: "garrafa" }, "叫": { p: "jiào", t: "chamar" },
+    "带": { p: "dài", t: "trazer/levar" }, "顺": { p: "shùn", t: "seguir/tranquilo" }, "光": { p: "guāng", t: "apenas/luz" },
+    "爱": { p: "ài", t: "amar" }, "离": { p: "lí", t: "distante de" }, "近": { p: "jìn", t: "perto" },
+    "认": { p: "rèn", t: "reconhecer" }, "眼": { p: "yǎn", t: "olho" }, "只": { p: "zhǐ", t: "apenas" },
+    "贵": { p: "guì", t: "caro" }, "书": { p: "shū", t: "livro" }, "果": { p: "guǒ", t: "fruto/resultado" },
+    "尤": { p: "yóu", t: "especialmente" }, "其": { p: "qí", t: "seu/dele" }, "选": { p: "xuǎn", t: "escolher" },
+    "购": { p: "gòu", t: "comprar" }, "根": { p: "gēn", t: "raiz/conforme" }, "据": { p: "jù", t: "conforme" },
+    "解": { p: "jiě", t: "resolver/entender" }, "举": { p: "jǔ", t: "levantar/realizar" }, "花": { p: "huā", t: "gastar/flor" },
+    "务": { p: "wù", t: "assunto/tarefa" }, "标": { p: "biāo", t: "marca/padrão" }, "准": { p: "zhǔn", t: "exato/permitir" },
+    "话": { p: "huà", t: "fala/palavra" }, "通": { p: "tōng", t: "comum/passar" }, "普": { p: "pǔ", t: "geral/comum" },
+    "重": { p: "zhòng", t: "pesado/importante" }, "考": { p: "kǎo", t: "examinar/pensar" }, "虑": { p: "lǜ", t: "considerar" },
+    "喝": { p: "hē", t: "beber" }, "坐": { p: "zuò", t: "sentar" }, "喜": { p: "xǐ", t: "gostar" },
+    "欢": { p: "huān", t: "alegre" }, "桥": { p: "qiáo", t: "ponte" }, "球": { p: "qiú", t: "bola" },
+    "始": { p: "shǐ", t: "começar" }, "顾": { p: "gù", t: "cuidar/cliente" }, "客": { p: "kè", t: "convidado/cliente" },
+    "站": { p: "zhàn", t: "estação/ficar de pé" }, "冷": { p: "lěng", t: "frio" }, "量": { p: "liàng", t: "quantidade" },
+    "质": { p: "zhì", t: "qualidade/matéria" }, "分": { p: "fēn", t: "centavo/minuto" }, "货": { p: "huò", t: "mercadoria" },
+    "第": { p: "dì", t: "(ordinal)" }, "六": { p: "liù", t: "seis" }, "课": { p: "kè", t: "lição/aula" },
+    "信": { p: "xìn", t: "carta/confiar" }, "银": { p: "yín", t: "prata" }, "原": { p: "yuán", t: "original" },
+    "因": { p: "yīn", t: "causa" }, "节": { p: "jié", t: "festival/nó" }, "目": { p: "mù", t: "olho/item" },
+    "浪": { p: "làng", t: "onda/desperdício" }, "费": { p: "fèi", t: "gasto/taxa" }, "蛋": { p: "dàn", t: "ovo" },
+    "糕": { p: "gāo", t: "bolo" }, "完": { p: "wán", t: "terminar" }, "包": { p: "bāo", t: "pão/bolsa/embrulhar" },
+    "味": { p: "wèi", t: "sabor" }, "洗": { p: "xǐ", t: "lavar" }, "车": { p: "chē", t: "carro" },
+    "超": { p: "chāo", t: "super/exceder" }, "市": { p: "shì", t: "mercado/cidade" }, "香": { p: "xiāng", t: "cheiroso" },
+    "蕉": { p: "jiāo", t: "banana" }, "苹": { p: "píng", t: "maçã" }, "斤": { p: "jīn", t: "jin (0,5kg)" },
+    "西": { p: "xī", t: "oeste" }, "柿": { p: "shì", t: "caqui/tomate" }, "招": { p: "zhāo", t: "recrutar/acenar" },
+    "聘": { p: "pìn", t: "contratar" }, "会": { p: "huì", t: "reunião/poder" }, "合": { p: "hé", t: "combinar/juntar" },
+    "间": { p: "jiān", t: "entre/sala" }, "房": { p: "fáng", t: "casa/quarto" }, "值": { p: "zhí", t: "valer" },
+    "得": { p: "de/dé", t: "(partícula)/obter" }, "考": { p: "kǎo", t: "pensar/examinar" }, "价": { p: "jià", t: "preço" },
+    "将": { p: "jiāng", t: "no futuro/vai" }, "降": { p: "jiàng", t: "cair/baixar" }, "脑": { p: "nǎo", t: "cérebro" },
+    "奖": { p: "jiǎng", t: "prêmio" }, "金": { p: "jīn", t: "ouro/metal" }, "期": { p: "qī", t: "período" },
+    "海": { p: "hǎi", t: "mar" }, "游": { p: "yóu", t: "nadar/passear" }, "旅": { p: "lǚ", t: "viagem" },
+    "李": { p: "lǐ", t: "bagagem/Li" }, "箱": { p: "xiāng", t: "caixa/mala" }, "轻": { p: "qīng", t: "leve" },
+    "唱": { p: "chàng", t: "cantar" }, "歌": { p: "gē", t: "canção" }, "散": { p: "sàn", t: "espalhar/passear" },
+    "步": { p: "bù", t: "passo" }, "衬": { p: "chèn", t: "forro/camisa" }, "衫": { p: "shān", t: "camisa" },
+    "裤": { p: "kù", t: "calça" }, "折": { p: "zhé", t: "dobrar/desconto" }, "蓝": { p: "lán", t: "azul" },
+    "售": { p: "shòu", t: "vender" }, "员": { p: "yuán", t: "membro/funcionário" }, "律": { p: "lǜ", t: "lei" },
+    "师": { p: "shī", t: "mestre/professor" }, "租": { p: "zū", t: "alugar" }, "司": { p: "sī", t: "gerir/companhia" },
+    "沙": { p: "shā", t: "areia" }, "发": { p: "fā", t: "enviar/emitir" }, "门": { p: "mén", t: "porta" },
+    "具": { p: "jù", t: "ferramenta/utensílio" }, "体": { p: "tǐ", t: "corpo" }, "育": { p: "yù", t: "educar" },
+    "馆": { p: "guǎn", t: "salão/prédio" }, "图": { p: "tú", t: "imagem/mapa" }, "手": { p: "shǒu", t: "mão" },
+    "共": { p: "gòng", t: "juntos/total" }, "葡": { p: "pú", t: "(uva)" }, "萄": { p: "táo", t: "(uva)" },
+    "零": { p: "líng", t: "zero" }, "五": { p: "wǔ", t: "cinco" }, "千": { p: "qiān", t: "mil" },
+    "三": { p: "sān", t: "três" }, "百": { p: "bǎi", t: "cem" }, "逛": { p: "guàng", t: "passear" },
+    "街": { p: "jiē", t: "rua" }, "场": { p: "chǎng", t: "campo/local" }, "裙": { p: "qún", t: "saia" },
+    "许": { p: "xǔ", t: "permitir/muitos" }, "母": { p: "mǔ", t: "mãe" }, "亲": { p: "qīn", t: "parente/próximo" },
+    "生": { p: "shēng", t: "nascer/vida" }, "意": { p: "yì", t: "significado/ideia" }, "瘦": { p: "shòu", t: "magro" },
+    "漂": { p: "piào", t: "bonito/flutuar" }, "亮": { p: "liàng", t: "brilhante" }, "黄": { p: "huáng", t: "amarelo/Huang" },
+    "白": { p: "bái", t: "branco" }, "休": { p: "xiū", t: "descansar" }, "息": { p: "xī", t: "descanso/respirar" },
+    "外": { p: "wài", t: "fora" }, "地": { p: "dì", t: "terra/lugar" }, "赛": { p: "sài", t: "competir" },
+    "运": { p: "yùn", t: "sorte/transportar" }, "动": { p: "dòng", t: "mover" }, "医": { p: "yī", t: "medicina" },
+    "衣": { p: "yī", t: "roupa" }, "汁": { p: "zhī", t: "suco" }, "牛": { p: "niú", t: "boi/vaca" },
+    "奶": { p: "nǎi", t: "leite/vovó" }, "楼": { p: "lóu", t: "andar/prédio" }, "气": { p: "qì", t: "ar/gás" },
+    "网": { p: "wǎng", t: "rede/internet" }, "笔": { p: "bǐ", t: "caneta" }, "记": { p: "jì", t: "registrar" },
+    "本": { p: "běn", t: "raiz/livro" }, "特": { p: "tè", t: "especial" }, "慢": { p: "màn", t: "lento" },
+    "鸡": { p: "jī", t: "galinha" }, "冰": { p: "bīng", t: "gelo" }, "像": { p: "xiàng", t: "parecer" },
+    "皮": { p: "pí", t: "pele/couro" }, "肤": { p: "fū", t: "pele" }, "号": { p: "hào", t: "número/tamanho" },
+    "黑": { p: "hēi", t: "preto" }, "满": { p: "mǎn", t: "cheio" }, "修": { p: "xiū", t: "consertar" },
+    "保": { p: "bǎo", t: "proteger/garantir" }, "任": { p: "rèn", t: "qualquer/nomear" }, "何": { p: "hé", t: "qual/o quê" },
+    "调": { p: "tiáo", t: "ajustar" }, "同": { p: "tóng", t: "mesmo/junto" }, "终": { p: "zhōng", t: "fim/finalmente" },
+    "于": { p: "yú", t: "em/a" }, "帅": { p: "shuài", t: "bonito" }, "貌": { p: "mào", t: "aparência" },
+    "礼": { p: "lǐ", t: "presente/cortesia" }, "兴": { p: "xìng", t: "interesse/alegria" }, "趣": { p: "qù", t: "interesse" },
+    "难": { p: "nán", t: "difícil" }, "过": { p: "guò", t: "passar/(experiência)" }, "感": { p: "gǎn", t: "sentir" },
+    "况": { p: "kuàng", t: "situação" }, "获": { p: "huò", t: "obter" }, "坚": { p: "jiān", t: "firme" },
+    "持": { p: "chí", t: "segurar/manter" }, "求": { p: "qiú", t: "pedir/buscar" }, "功": { p: "gōng", t: "mérito/sucesso" },
+    "安": { p: "ān", t: "paz/instalar" }, "排": { p: "pái", t: "organizar/fila" }, "查": { p: "chá", t: "verificar" },
+    "丰": { p: "fēng", t: "abundante" }, "富": { p: "fù", t: "rico" }, "校": { p: "xiào", t: "escola" },
+    "支": { p: "zhī", t: "apoiar/ramo" }, "持": { p: "chí", t: "manter" }, "方": { p: "fāng", t: "direção/quadrado" },
+    "竟": { p: "jìng", t: "afinal" }, "然": { p: "rán", t: "assim" }, "夏": { p: "xià", t: "verão" },
+    "教": { p: "jiào", t: "ensinar" }, "授": { p: "shòu", t: "conceder/ensinar" }, "谢": { p: "xiè", t: "agradecer" },
+    "应": { p: "yīng", t: "dever" }, "该": { p: "gāi", t: "dever" }, "法": { p: "fǎ", t: "lei/método" },
+    "直": { p: "zhí", t: "reto/direto" }, "接": { p: "jiē", t: "receber/conectar" }, "倍": { p: "bèi", t: "vezes/múltiplo" },
+    "毕": { p: "bì", t: "concluir" }, "业": { p: "yè", t: "profissão/estudo" }, "护": { p: "hù", t: "proteger" },
+    "照": { p: "zhào", t: "iluminar/foto" }, "遇": { p: "yù", t: "encontrar" }, "脾": { p: "pí", t: "baço/gênio" },
+    "差": { p: "chà", t: "ruim/faltar" }, "诚": { p: "chéng", t: "sincero" }, "实": { p: "shí", t: "real" },
+    "相": { p: "xiāng", t: "mútuo" }, "流": { p: "liú", t: "fluir/moda" }, "热": { p: "rè", t: "quente" },
+    "情": { p: "qíng", t: "sentimento/situação" }, "舒": { p: "shū", t: "confortável" }, "服": { p: "fú", t: "roupa/servir" },
+    "扰": { p: "rǎo", t: "incomodar" }, "愿": { p: "yuàn", t: "desejar" }, "季": { p: "jì", t: "estação" },
+    "假": { p: "jià", t: "feriado/falso" }, "各": { p: "gè", t: "cada" }, "吸": { p: "xī", t: "sugar/atrair" },
+    "引": { p: "yǐn", t: "puxar/atrair" }, "甚": { p: "shèn", t: "muito/até" }, "至": { p: "zhì", t: "até/chegar" },
+    "检": { p: "jiǎn", t: "inspecionar" }, "提": { p: "tí", t: "levantar/mencionar" }, "醒": { p: "xǐng", t: "acordar/lembrar" },
+    "食": { p: "shí", t: "comida/comer" }, "品": { p: "pǐn", t: "produto/artigo" }, "仅": { p: "jǐn", t: "apenas" },
+    "吃": { p: "chī", t: "comer" }, "而": { p: "ér", t: "e/mas" }, "且": { p: "qiě", t: "e/além disso" },
+    "处": { p: "chù", t: "lugar/benefício" }, "点": { p: "diǎn", t: "ponto/hora" }, "净": { p: "jìng", t: "limpo" },
+    "友": { p: "yǒu", t: "amigo" }, "乐": { p: "lè", t: "alegria" }, "酒": { p: "jiǔ", t: "bebida alcoólica" },
+    "瓜": { p: "guā", t: "melão/melancia" }, "迎": { p: "yíng", t: "receber" }, "愉": { p: "yú", t: "alegre" },
+    "环": { p: "huán", t: "anel/ambiente" }, "境": { p: "jìng", t: "fronteira/situação" }, "即": { p: "jí", t: "logo/mesmo" },
+    "使": { p: "shǐ", t: "usar/fazer" }, "袜": { p: "wà", t: "meia" }, "弟": { p: "dì", t: "irmão mais novo" },
+    "满": { p: "mǎn", t: "cheio" }, "里": { p: "lǐ", t: "dentro/li" }, "供": { p: "gōng", t: "fornecer" },
+    "影": { p: "yǐng", t: "sombra/filme" }, "艺": { p: "yì", t: "arte" }, "术": { p: "shù", t: "técnica/arte" },
+    "京": { p: "jīng", t: "capital" }, "尝": { p: "cháng", t: "provar" }, "菜": { p: "cài", t: "prato/comida" },
+    "联": { p: "lián", t: "conectar/unir" }, "系": { p: "xì", t: "sistema/relação" }
+};
+/* ===================== ICONS & IMAGES ===================== */
+const ICON_HEADPHONE = '<svg viewBox="0 0 24 24" class="section-big-icon" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"></path><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path></svg>';
+const ICON_BOOK = '<svg viewBox="0 0 24 24" class="section-big-icon" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>';
+const ICON_PEN = '<svg viewBox="0 0 24 24" class="section-big-icon" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"></path><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path><path d="M2 2l7.586 7.586"></path><circle cx="11" cy="11" r="2"></circle></svg>';
+const IMG_CHANG = "https://images.unsplash.com/photo-1556908153-1055831bf70f?auto=format&fit=crop&w=800&q=70";
+const IMG_QING = "https://images.unsplash.com/photo-1607083206968-13611e3d76db?auto=format&fit=crop&w=800&q=70";
+const SVG_CHANG = '<svg viewBox="0 0 200 130" style="width:380px;max-width:100%;background:#e0f2fe;border-radius:12px;"><ellipse cx="95" cy="95" rx="55" ry="14" fill="#cbd5e1"/><path d="M45 78 h100 a10 10 0 0 1 -10 14 h-80 a10 10 0 0 1 -10 -14 z" fill="#fff" stroke="#0284c7" stroke-width="2"/><path d="M52 78 q43 -22 86 0" fill="#fde68a" stroke="#d97706" stroke-width="2"/><circle cx="80" cy="72" r="5" fill="#ef4444"/><circle cx="105" cy="70" r="5" fill="#10b981"/><line x1="150" y1="40" x2="120" y2="80" stroke="#64748b" stroke-width="3" stroke-linecap="round"/><line x1="158" y1="46" x2="128" y2="84" stroke="#64748b" stroke-width="3" stroke-linecap="round"/><text x="100" y="122" font-size="11" text-anchor="middle" fill="#0369a1">尝 · provar a comida</text></svg>';
+const SVG_QING = '<svg viewBox="0 0 200 130" style="width:380px;max-width:100%;background:#e0f2fe;border-radius:12px;"><path d="M70 55 h60 v45 h-60 z" fill="#fcd34d" stroke="#d97706" stroke-width="2"/><path d="M70 55 l30 -18 l30 18 z" fill="#fde68a" stroke="#d97706" stroke-width="2"/><line x1="100" y1="37" x2="100" y2="100" stroke="#d97706" stroke-width="2"/><path d="M70 74 h60" stroke="#b45309" stroke-width="3"/><path d="M96 74 v6 h8 v-6" fill="none" stroke="#b45309" stroke-width="2"/><path d="M55 100 q10 -10 15 0" fill="none" stroke="#64748b" stroke-width="3" stroke-linecap="round"/><text x="100" y="122" font-size="11" text-anchor="middle" fill="#0369a1">轻 · pacote leve</text></svg>';
+function imgBlock(url, svg, id) {
+    return '<div class="q-image-box"><img src="' + url + '" alt="imagem" onerror="this.style.display=\'none\';document.getElementById(\'' + id + '\').style.display=\'inline-block\'"><div id="' + id + '" style="display:none">' + svg + '</div></div>';
+}
+/* ===================== QUESTIONS DATA (Lição 6) ===================== */
+const questionsData = [
+/* ============ SECTION: LISTENING ============ */
+{
+    type: 'section', section: 'listening', badge: 'Teste 1 de 3', icon: ICON_HEADPHONE,
+    titleCn: '听力', titlePt: 'Compreensão Auditiva',
+    desc: 'Este teste possui 22 questões em 3 partes: julgamento verdadeiro/falso e questões de múltipla escolha, todas com tema de compras e preços. Use o botão "Mostrar Texto do Áudio" como apoio de leitura.'
+},
+/* ---- L Part 1 intro ---- */
+{
+    type: 'intro', part: 1, section: 'listening', title: '第一部分', titlePinyin: 'Dì-yī bùfèn',
+    instructions: '第 1 到 5 题：判断对错。', instructionsPinyin: 'Dì 1 dào 5 tí: Pànduàn duìcuò.',
+    examples: [
+    {
+        audio: '我想去办个信用卡，今天下午你有时间吗？陪我去一趟银行？',
+        pinyin: 'Wǒ xiǎng qù bàn ge xìnyòngkǎ, jīntiān xiàwǔ nǐ yǒu shíjiān ma? Péi wǒ qù yí tàng yínháng?',
+        trans: 'Eu quero fazer um cartão de crédito, você tem tempo hoje à tarde? Me acompanha até o banco?',
+        q: '★ 他打算下午去银行。', qPinyin: '★ Tā dǎsuàn xiàwǔ qù yínháng.',
+        qTrans: '★ Ele planeja ir ao banco à tarde.', ans: '√'
+    },
+    {
+        audio: '现在我很少看电视，其中一个原因是，广告太多了，不管什么时间，也不管什么节目，只要你打开电视，总能看到那么多的广告，浪费我的时间。',
+        pinyin: 'Xiànzài wǒ hěn shǎo kàn diànshì, qízhōng yígè yuányīn shì, guǎnggào tài duō le...',
+        trans: 'Atualmente assisto pouco à TV; um dos motivos é o excesso de anúncios — desperdiçam o meu tempo.',
+        q: '★ 他喜欢看电视广告。', qPinyin: '★ Tā xǐhuan kàn diànshì guǎnggào.',
+        qTrans: '★ Ele gosta de assistir a comerciais de TV.', ans: '×'
+    }]
+},
+{
+    id: 1, part: 1, section: 'listening', type: 'tf',
+    instructionChar: '第 1 到 5 题：判断对错。', instructionPinyin: 'Dì 1 dào 5 tí: Pànduàn duìcuò.',
+    instructionTrans: 'Questões 1 a 5: Julgue se é verdadeiro ou falso.',
+    audioChar: '对不起，先生，那种蛋糕已经卖完了，不过，您可以尝一下这种面包，味道也不错。',
+    audioPinyin: 'Duìbuqǐ, xiānsheng, nà zhǒng dàngāo yǐjīng màiwán le, búguò, nín kěyǐ cháng yíxià zhè zhǒng miànbāo, wèidào yě búcuò.',
+    audioTrans: 'Desculpe, senhor, aquele tipo de bolo já esgotou; no entanto, o senhor pode provar este pão, o sabor também é bom.',
+    qChar: '★ 他想买面包。', qPinyin: '★ Tā xiǎng mǎi miànbāo.',
+    qTrans: '★ Ele quer comprar pão.',
+    options: ['√', '×'], correctAnswer: 1,
+    explanation: 'O cliente queria o 蛋糕 (bolo), que esgotou; o pão é apenas uma sugestão da vendedora. Falso.'
+},
+{
+    id: 2, part: 1, section: 'listening', type: 'tf',
+    instructionChar: '第 1 到 5 题：判断对错。', instructionPinyin: 'Dì 1 dào 5 tí: Pànduàn duìcuò.',
+    instructionTrans: 'Questões 1 a 5: Julgue se é verdadeiro ou falso.',
+    audioChar: '哥，一会儿你洗完车，顺便去一趟超市好吗？帮我买点儿香蕉，再买几斤苹果。',
+    audioPinyin: 'Gē, yíhuìr nǐ xǐ wán chē, shùnbiàn qù yí tàng chāoshì hǎo ma? Bāng wǒ mǎi diǎnr xiāngjiāo, zài mǎi jǐ jīn píngguǒ.',
+    audioTrans: 'Irmão, quando terminar de lavar o carro, pode aproveitar e ir ao supermercado? Compre umas bananas para mim e também alguns quilos de maçã.',
+    qChar: '★ 她想买些西红柿。', qPinyin: '★ Tā xiǎng mǎi xiē xīhóngshì.',
+    qTrans: '★ Ela quer comprar alguns tomates.',
+    options: ['√', '×'], correctAnswer: 1,
+    explanation: 'Ela pede 香蕉 (bananas) e 苹果 (maçãs), não 西红柿 (tomates). Falso.'
+},
+{
+    id: 3, part: 1, section: 'listening', type: 'tf',
+    instructionChar: '第 1 到 5 题：判断对错。', instructionPinyin: 'Dì 1 dào 5 tí: Pànduàn duìcuò.',
+    instructionTrans: 'Questões 1 a 5: Julgue se é verdadeiro ou falso.',
+    audioChar: '您是要参加招聘会吗？这件就挺适合的，很正式。您可以试一试，试衣间在这边。',
+    audioPinyin: 'Nín shì yào cānjiā zhāopìnhuì ma? Zhè jiàn jiù tǐng shìhé de, hěn zhèngshì. Nín kěyǐ shì yi shì, shìyījiān zài zhè biān.',
+    audioTrans: 'O senhor vai participar de uma feira de empregos? Esta peça é bem adequada, muito formal. Pode experimentar; o provador é por aqui.',
+    qChar: '★ 他们在参加招聘会。', qPinyin: '★ Tāmen zài cānjiā zhāopìnhuì.',
+    qTrans: '★ Eles estão participando de uma feira de empregos.',
+    options: ['√', '×'], correctAnswer: 1,
+    explanation: 'A vendedora ajuda o cliente a comprar roupa formal para uma feira de empregos; eles não estão participando dela agora. Falso.'
+},
+{
+    id: 4, part: 1, section: 'listening', type: 'tf',
+    instructionChar: '第 1 到 5 题：判断对错。', instructionPinyin: 'Dì 1 dào 5 tí: Pànduàn duìcuò.',
+    instructionTrans: 'Questões 1 a 5: Julgue se é verdadeiro ou falso.',
+    audioChar: '该不该买房子，这是个值得认真考虑的问题。因为已经很高的房价，将来可能会降下来，但也有可能会变得更高。',
+    audioPinyin: 'Gāi bù gāi mǎi fángzi, zhè shì ge zhídé rènzhēn kǎolǜ de wèntí. Yīnwèi yǐjīng hěn gāo de fángjià, jiānglái kěnéng huì jiàng xiàlái, dàn yě yǒu kěnéng huì biàn de gèng gāo.',
+    audioTrans: 'Comprar ou não uma casa é uma questão que vale a pena considerar com seriedade. Porque o preço dos imóveis, já muito alto, no futuro pode cair, mas também pode ficar ainda mais alto.',
+    qChar: '★ 现在的房子很贵。', qPinyin: '★ Xiànzài de fángzi hěn guì.',
+    qTrans: '★ As casas de hoje em dia são muito caras.',
+    options: ['√', '×'], correctAnswer: 0,
+    explanation: '已经很高的房价 (o preço dos imóveis já está muito alto): as casas são caras. Verdadeiro.'
+},
+{
+    id: 5, part: 1, section: 'listening', type: 'tf',
+    instructionChar: '第 1 到 5 题：判断对错。', instructionPinyin: 'Dì 1 dào 5 tí: Pànduàn duìcuò.',
+    instructionTrans: 'Questões 1 a 5: Julgue se é verdadeiro ou falso.',
+    audioChar: '家里的电脑太旧了，正好公司发了一万元奖金，我想星期天去买台电脑，你不会不同意吧？',
+    audioPinyin: 'Jiā lǐ de diànnǎo tài jiù le, zhènghǎo gōngsī fā le yí wàn yuán jiǎngjīn, wǒ xiǎng xīngqītiān qù mǎi tái diànnǎo, nǐ bú huì bù tóngyì ba?',
+    audioTrans: 'O computador de casa está muito velho; por coincidência a empresa pagou um bônus de dez mil yuans, quero ir comprar um computador no domingo, você não vai discordar, vai?',
+    qChar: '★ 他想周日去买电脑。', qPinyin: '★ Tā xiǎng zhōu rì qù mǎi diànnǎo.',
+    qTrans: '★ Ele quer ir comprar um computador no domingo.',
+    options: ['√', '×'], correctAnswer: 0,
+    explanation: '星期天去买台电脑 (comprar um computador no domingo) = 周日. Verdadeiro.'
+},
+/* ---- L Part 2 intro ---- */
+{
+    type: 'intro', part: 2, section: 'listening', title: '第二部分', titlePinyin: 'Dì-èr bùfèn',
+    instructions: '第 6 到 12 题：请选出正确答案。', instructionsPinyin: 'Dì 6 dào 12 tí: Qǐng xuǎnchū zhèngquè dá\'àn.',
+    examples: [{
+        audio: '女：请问，这附近有超市吗？<br>男：有，就在前面，很方便。',
+        pinyin: 'Nǚ: Qǐngwèn, zhè fùjìn yǒu chāoshì ma?<br>Nán: Yǒu, jiù zài qiánmiàn, hěn fāngbiàn.',
+        trans: 'Mulher: Com licença, há um supermercado aqui perto?<br>Homem: Há sim, logo à frente, bem conveniente.',
+        q: '问：男的是什么意思？', qPinyin: 'Wèn: Nán de shì shénme yìsi?',
+        qTrans: 'O que o homem quer dizer?', ans: 'D 附近有超市 (Há um supermercado por perto)'
+    }]
+},
+{
+    id: 6, part: 2, section: 'listening', type: 'mc',
+    instructionChar: '第 6 到 12 题：请选出正确答案。', instructionPinyin: 'Dì 6 dào 12 tí: Qǐng xuǎnchū zhèngquè dá\'àn.',
+    instructionTrans: 'Questões 6 a 12: Escolha a resposta correta.',
+    audioChar: '女：天都这么晚了，你还出去干什么？\n男：我们明天去上海旅游，我要去买一个轻一点儿的行李箱。',
+    audioPinyin: 'Nǚ: Tiān dōu zhème wǎn le, nǐ hái chūqù gàn shénme?\nNán: Wǒmen míngtiān qù Shànghǎi lǚyóu, wǒ yào qù mǎi yí gè qīng yìdiǎnr de xínglǐxiāng.',
+    audioTrans: 'Mulher: Já está tão tarde, o que ainda vai fazer lá fora?\nHomem: Vamos viajar para Xangai amanhã, vou comprar uma mala mais leve.',
+    qChar: '问：男的现在要去做什么？', qPinyin: 'Wèn: Nán de xiànzài yào qù zuò shénme?', qTrans: 'O que o homem vai fazer agora?',
+    options: ['请假', '唱歌', '散步', '买东西'],
+    optionsPinyin: ['qǐngjià', 'chànggē', 'sànbù', 'mǎi dōngxi'],
+    optionsTrans: ['Pedir folga', 'Cantar', 'Passear', 'Comprar coisas'],
+    correctAnswer: 3, explanation: '他要去买行李箱 (vai comprar uma mala) = 买东西.'
+},
+{
+    id: 7, part: 2, section: 'listening', type: 'mc',
+    instructionChar: '第 6 到 12 题：请选出正确答案。', instructionPinyin: 'Dì 6 dào 12 tí: Qǐng xuǎnchū zhèngquè dá\'àn.',
+    instructionTrans: 'Questões 6 a 12: Escolha a resposta correta.',
+    audioChar: '男：我们店的衬衫和裤子现在都在打折，您看有什么需要的？\n女：这条裤子有蓝色的吗？找一条我试试。',
+    audioPinyin: 'Nán: Wǒmen diàn de chènshān hé kùzi xiànzài dōu zài dǎzhé, nín kàn yǒu shénme xūyào de?\nNǚ: Zhè tiáo kùzi yǒu lánsè de ma? Zhǎo yì tiáo wǒ shìshi.',
+    audioTrans: 'Homem: As camisas e calças da nossa loja estão com desconto; a senhora vê algo de que precise?\nMulher: Essa calça tem na cor azul? Ache uma para eu experimentar.',
+    qChar: '问：男的最可能是做什么的？', qPinyin: 'Wèn: Nán de zuì kěnéng shì zuò shénme de?', qTrans: 'Qual é provavelmente a profissão do homem?',
+    options: ['老师', '售货员', '律师', '出租车司机'],
+    optionsPinyin: ['lǎoshī', 'shòuhuòyuán', 'lǜshī', 'chūzūchē sījī'],
+    optionsTrans: ['Professor', 'Vendedor', 'Advogado', 'Motorista de táxi'],
+    correctAnswer: 1, explanation: 'Ele fala de "我们店" (nossa loja) e dos descontos: é um 售货员 (vendedor).'
+},
+{
+    id: 8, part: 2, section: 'listening', type: 'mc',
+    instructionChar: '第 6 到 12 题：请选出正确答案。', instructionPinyin: 'Dì 6 dào 12 tí: Qǐng xuǎnchū zhèngquè dá\'àn.',
+    instructionTrans: 'Questões 6 a 12: Escolha a resposta correta.',
+    audioChar: '男：现在买沙发，能免费送货上门吗？\n女：可以，请您留个电话，我们三日内给您送到。',
+    audioPinyin: 'Nán: Xiànzài mǎi shāfā, néng miǎnfèi sòng huò shàngmén ma?\nNǚ: Kěyǐ, qǐng nín liú ge diànhuà, wǒmen sān rì nèi gěi nín sòng dào.',
+    audioTrans: 'Homem: Comprando o sofá agora, vocês entregam em domicílio de graça?\nMulher: Sim, deixe um telefone, entregamos em até três dias.',
+    qChar: '问：他们最可能在哪儿？', qPinyin: 'Wèn: Tāmen zuì kěnéng zài nǎr?', qTrans: 'Onde é mais provável que eles estejam?',
+    options: ['家具店', '体育馆', '图书馆', '洗手间'],
+    optionsPinyin: ['jiājùdiàn', 'tǐyùguǎn', 'túshūguǎn', 'xǐshǒujiān'],
+    optionsTrans: ['Loja de móveis', 'Ginásio', 'Biblioteca', 'Banheiro'],
+    correctAnswer: 0, explanation: 'Falam em comprar 沙发 (sofá) com entrega: estão numa 家具店 (loja de móveis).'
+},
+{
+    id: 9, part: 2, section: 'listening', type: 'mc',
+    instructionChar: '第 6 到 12 题：请选出正确答案。', instructionPinyin: 'Dì 6 dào 12 tí: Qǐng xuǎnchū zhèngquè dá\'àn.',
+    instructionTrans: 'Questões 6 a 12: Escolha a resposta correta.',
+    audioChar: '女：你好，一共多少钱？\n男：两斤西红柿、一斤葡萄，一共是二十块零五。',
+    audioPinyin: 'Nǚ: Nǐ hǎo, yígòng duōshǎo qián?\nNán: Liǎng jīn xīhóngshì, yì jīn pútao, yígòng shì èrshí kuài líng wǔ.',
+    audioTrans: 'Mulher: Olá, quanto é no total?\nHomem: Dois jin de tomates, um jin de uvas, no total vinte yuans e cinco.',
+    qChar: '问：女的买什么了？', qPinyin: 'Wèn: Nǚ de mǎi shénme le?', qTrans: 'O que a mulher comprou?',
+    options: ['西红柿和香蕉', '香蕉和葡萄', '西红柿和葡萄', '西红柿和苹果'],
+    optionsPinyin: ['xīhóngshì hé xiāngjiāo', 'xiāngjiāo hé pútao', 'xīhóngshì hé pútao', 'xīhóngshì hé píngguǒ'],
+    optionsTrans: ['Tomates e bananas', 'Bananas e uvas', 'Tomates e uvas', 'Tomates e maçãs'],
+    correctAnswer: 2, explanation: '西红柿 + 葡萄 (tomates e uvas).'
+},
+{
+    id: 10, part: 2, section: 'listening', type: 'mc',
+    instructionChar: '第 6 到 12 题：请选出正确答案。', instructionPinyin: 'Dì 6 dào 12 tí: Qǐng xuǎnchū zhèngquè dá\'àn.',
+    instructionTrans: 'Questões 6 a 12: Escolha a resposta correta.',
+    audioChar: '男：这双鞋多少钱？\n女：原价一千，现在打三折，很便宜。',
+    audioPinyin: 'Nán: Zhè shuāng xié duōshǎo qián?\nNǚ: Yuánjià yì qiān, xiànzài dǎ sān zhé, hěn piányi.',
+    audioTrans: 'Homem: Quanto custa este par de sapatos?\nMulher: O preço original era mil, agora está com desconto de 70% (paga-se 30%), muito barato.',
+    qChar: '问：这双鞋现在卖多少钱？', qPinyin: 'Wèn: Zhè shuāng xié xiànzài mài duōshǎo qián?', qTrans: 'Por quanto o par de sapatos é vendido agora?',
+    options: ['300元', '500元', '700元', '1000元'],
+    optionsPinyin: ['sānbǎi yuán', 'wǔbǎi yuán', 'qībǎi yuán', 'yìqiān yuán'],
+    optionsTrans: ['300 yuans', '500 yuans', '700 yuans', '1000 yuans'],
+    correctAnswer: 0, explanation: '打三折 = paga-se 30% de 1000 = 300元.'
+},
+{
+    id: 11, part: 2, section: 'listening', type: 'mc',
+    instructionChar: '第 6 到 12 题：请选出正确答案。', instructionPinyin: 'Dì 6 dào 12 tí: Qǐng xuǎnchū zhèngquè dá\'àn.',
+    instructionTrans: 'Questões 6 a 12: Escolha a resposta correta.',
+    audioChar: '女：下班陪我去逛街怎么样？最近许多商场在打折，我想去买条裙子。\n男：今天不行，公司加班，星期六再去吧。',
+    audioPinyin: 'Nǚ: Xiàbān péi wǒ qù guàngjiē zěnmeyàng? Zuìjìn xǔduō shāngchǎng zài dǎzhé, wǒ xiǎng qù mǎi tiáo qúnzi.\nNán: Jīntiān bùxíng, gōngsī jiābān, xīngqīliù zài qù ba.',
+    audioTrans: 'Mulher: Que tal me acompanhar às compras depois do trabalho? Muitos shoppings estão com desconto, quero comprar uma saia.\nHomem: Hoje não dá, tenho hora extra na empresa, vamos no sábado.',
+    qChar: '问：男的要做什么？', qPinyin: 'Wèn: Nán de yào zuò shénme?', qTrans: 'O que o homem vai fazer?',
+    options: ['逛街', '加班', '打球', '买礼物'],
+    optionsPinyin: ['guàngjiē', 'jiābān', 'dǎqiú', 'mǎi lǐwù'],
+    optionsTrans: ['Fazer compras', 'Fazer hora extra', 'Jogar bola', 'Comprar presentes'],
+    correctAnswer: 1, explanation: '公司加班 (hora extra na empresa): o homem vai 加班.'
+},
+{
+    id: 12, part: 2, section: 'listening', type: 'mc',
+    instructionChar: '第 6 到 12 题：请选出正确答案。', instructionPinyin: 'Dì 6 dào 12 tí: Qǐng xuǎnchū zhèngquè dá\'àn.',
+    instructionTrans: 'Questões 6 a 12: Escolha a resposta correta.',
+    audioChar: '男：小黄，又去逛街了？买什么东西了？\n女：今天是母亲节，好多商店都在打折，我给我妈买了两件衣服。',
+    audioPinyin: 'Nán: Xiǎo Huáng, yòu qù guàngjiē le? Mǎi shénme dōngxi le?\nNǚ: Jīntiān shì Mǔqīnjié, hǎoduō shāngdiàn dōu zài dǎzhé, wǒ gěi wǒ mā mǎi le liǎng jiàn yīfu.',
+    audioTrans: 'Homem: Xiao Huang, foi às compras de novo? O que comprou?\nMulher: Hoje é Dia das Mães, muitas lojas estão com desconto, comprei duas roupas para minha mãe.',
+    qChar: '问：关于女的，可以知道什么？', qPinyin: 'Wèn: Guānyú nǚ de, kěyǐ zhīdào shénme?', qTrans: 'Sobre a mulher, o que se pode saber?',
+    options: ['在做生意', '去旅游了', '去逛街了', '衣服旧了'],
+    optionsPinyin: ['zài zuò shēngyi', 'qù lǚyóu le', 'qù guàngjiē le', 'yīfu jiù le'],
+    optionsTrans: ['Está fazendo negócios', 'Foi viajar', 'Foi às compras', 'As roupas estão velhas'],
+    correctAnswer: 2, explanation: '又去逛街了 e comprou roupas: ela 去逛街了 (foi às compras).'
+},
+/* ---- L Part 3 intro ---- */
+{
+    type: 'intro', part: 3, section: 'listening', title: '第三部分', titlePinyin: 'Dì-sān bùfèn',
+    instructions: '第 13 到 22 题：请选出正确答案。', instructionsPinyin: 'Dì 13 dào 22 tí: Qǐng xuǎnchū zhèngquè dá\'àn.',
+    examples: [{
+        audio: '男：这件衣服看起来很漂亮，多少钱？<br>女：现在打折，只要一百块。<br>男：好，我买了。',
+        pinyin: 'Nán: Zhè jiàn yīfu kànqǐlái hěn piàoliang, duōshǎo qián?<br>Nǚ: Xiànzài dǎzhé, zhǐ yào yìbǎi kuài.<br>Nán: Hǎo, wǒ mǎi le.',
+        trans: 'Homem: Esta roupa é bonita, quanto custa?<br>Mulher: Está com desconto, só cem yuans.<br>Homem: Ok, vou comprar.',
+        q: '问：那件衣服多少钱？', qPinyin: 'Wèn: Nà jiàn yīfu duōshǎo qián?', qTrans: 'Quanto custa a roupa?', ans: 'C 100 块'
+    }]
+},
+{
+    id: 13, part: 3, section: 'listening', type: 'mc',
+    instructionChar: '第 13 到 22 题：请选出正确答案。', instructionPinyin: 'Dì 13 dào 22 tí: Qǐng xuǎnchū zhèngquè dá\'àn.',
+    instructionTrans: 'Questões 13 a 22: Escolha a resposta correta.',
+    audioChar: '男：你穿这件衣服看起来又高又瘦，很漂亮。\n女：真的啊？太好了，你说我穿哪个颜色更好呢？\n男：你穿这个黄色的就挺好，不过白的也不错。\n女：那我再试试白的，两个比较一下。',
+    audioPinyin: 'Nán: Nǐ chuān zhè jiàn yīfu kànqǐlái yòu gāo yòu shòu, hěn piàoliang.\nNǚ: Zhēn de a? Tài hǎo le, nǐ shuō wǒ chuān nǎ ge yánsè gèng hǎo ne?\nNán: Nǐ chuān zhège huángsè de jiù tǐng hǎo, búguò bái de yě búcuò.\nNǚ: Nà wǒ zài shìshi bái de, liǎng ge bǐjiào yíxià.',
+    audioTrans: 'Homem: Você fica alta e magra com essa roupa, muito bonita.\nMulher: Sério? Que ótimo, qual cor você acha melhor?\nHomem: A amarela fica muito bem, mas a branca também não é ruim.\nMulher: Então vou experimentar a branca de novo, para comparar as duas.',
+    qChar: '问：女的是什么意思？', qPinyin: 'Wèn: Nǚ de shì shénme yìsi?', qTrans: 'O que a mulher quer dizer?',
+    options: ['她变胖了', '衣服太贵', '想买黄的', '再试试白的'],
+    optionsPinyin: ['tā biàn pàng le', 'yīfu tài guì', 'xiǎng mǎi huáng de', 'zài shìshi bái de'],
+    optionsTrans: ['Ela engordou', 'A roupa é cara demais', 'Quer comprar a amarela', 'Experimentar de novo a branca'],
+    correctAnswer: 3, explanation: '那我再试试白的 (vou experimentar a branca de novo).'
+},
+{
+    id: 14, part: 3, section: 'listening', type: 'mc',
+    instructionChar: '第 13 到 22 题：请选出正确答案。', instructionPinyin: 'Dì 13 dào 22 tí: Qǐng xuǎnchū zhèngquè dá\'àn.',
+    instructionTrans: 'Questões 13 a 22: Escolha a resposta correta.',
+    audioChar: '女：小王，你也来商场购物啊？\n男：我要买个行李箱。您要买什么？\n女：今天休息，所以过来逛逛。你买行李箱要去哪儿？\n男：我周末要去外地比赛。',
+    audioPinyin: 'Nǚ: Xiǎo Wáng, nǐ yě lái shāngchǎng gòuwù a?\nNán: Wǒ yào mǎi ge xínglǐxiāng. Nín yào mǎi shénme?\nNǚ: Jīntiān xiūxi, suǒyǐ guòlái guàngguang. Nǐ mǎi xínglǐxiāng yào qù nǎr?\nNán: Wǒ zhōumò yào qù wàidì bǐsài.',
+    audioTrans: 'Mulher: Xiao Wang, você também veio comprar no shopping?\nHomem: Vou comprar uma mala. E a senhora?\nMulher: Hoje é folga, então vim passear. Você vai comprar mala para ir aonde?\nHomem: Vou para fora da cidade competir no fim de semana.',
+    qChar: '问：男的最可能是做什么的？', qPinyin: 'Wèn: Nán de zuì kěnéng shì zuò shénme de?', qTrans: 'Qual é provavelmente a profissão do homem?',
+    options: ['医生', '老师', '售货员', '运动员'],
+    optionsPinyin: ['yīshēng', 'lǎoshī', 'shòuhuòyuán', 'yùndòngyuán'],
+    optionsTrans: ['Médico', 'Professor', 'Vendedor', 'Atleta'],
+    correctAnswer: 3, explanation: '去外地比赛 (viajar para competir): ele é um 运动员 (atleta).'
+},
+{
+    id: 15, part: 3, section: 'listening', type: 'mc',
+    instructionChar: '第 13 到 22 题：请选出正确答案。', instructionPinyin: 'Dì 13 dào 22 tí: Qǐng xuǎnchū zhèngquè dá\'àn.',
+    instructionTrans: 'Questões 13 a 22: Escolha a resposta correta.',
+    audioChar: '女：外面挺冷的，你把大衣穿上吧。\n男：不用，我就去楼下超市买果汁，马上就回来。\n女：你顺便再买两瓶牛奶吧。\n男：没问题。',
+    audioPinyin: 'Nǚ: Wàimiàn tǐng lěng de, nǐ bǎ dàyī chuān shàng ba.\nNán: Búyòng, wǒ jiù qù lóuxià chāoshì mǎi guǒzhī, mǎshàng jiù huílái.\nNǚ: Nǐ shùnbiàn zài mǎi liǎng píng niúnǎi ba.\nNán: Méi wèntí.',
+    audioTrans: 'Mulher: Lá fora está frio, vista o sobretudo.\nHomem: Não precisa, só vou ao supermercado de baixo comprar suco, volto logo.\nMulher: Aproveite e compre também duas garrafas de leite.\nHomem: Sem problema.',
+    qChar: '问：根据对话，可以知道什么？', qPinyin: 'Wèn: Gēnjù duìhuà, kěyǐ zhīdào shénme?', qTrans: 'De acordo com o diálogo, o que se pode saber?',
+    options: ['天气很冷', '电梯坏了', '女的去买东西', '他们在逛街'],
+    optionsPinyin: ['tiānqì hěn lěng', 'diàntī huài le', 'nǚ de qù mǎi dōngxi', 'tāmen zài guàngjiē'],
+    optionsTrans: ['O tempo está muito frio', 'O elevador quebrou', 'A mulher foi comprar coisas', 'Eles estão passeando'],
+    correctAnswer: 0, explanation: '外面挺冷的 (lá fora está bem frio): 天气很冷.'
+},
+{
+    id: 16, part: 3, section: 'listening', type: 'mc',
+    instructionChar: '第 13 到 22 题：请选出正确答案。', instructionPinyin: 'Dì 13 dào 22 tí: Qǐng xuǎnchū zhèngquè dá\'àn.',
+    instructionTrans: 'Questões 13 a 22: Escolha a resposta correta.',
+    audioChar: '男：你在做什么呢？\n女：我上网呢，想买个新的笔记本电脑。\n男：你那台电脑是该换了。\n女：用了两年多了，现在特别慢，太不好用了！',
+    audioPinyin: 'Nán: Nǐ zài zuò shénme ne?\nNǚ: Wǒ shàngwǎng ne, xiǎng mǎi ge xīn de bǐjìběn diànnǎo.\nNán: Nǐ nà tái diànnǎo shì gāi huàn le.\nNǚ: Yòng le liǎng nián duō le, xiànzài tèbié màn, tài bù hǎoyòng le!',
+    audioTrans: 'Homem: O que você está fazendo?\nMulher: Estou na internet, quero comprar um notebook novo.\nHomem: Aquele seu computador já devia ser trocado.\nMulher: Usei mais de dois anos, agora está muito lento, péssimo de usar!',
+    qChar: '问：女的觉得那台电脑怎么样？', qPinyin: 'Wèn: Nǚ de juéde nà tái diànnǎo zěnmeyàng?', qTrans: 'O que a mulher acha daquele computador?',
+    options: ['不好看', '不好用', '很便宜', '很好用'],
+    optionsPinyin: ['bù hǎokàn', 'bù hǎoyòng', 'hěn piányi', 'hěn hǎoyòng'],
+    optionsTrans: ['Não é bonito', 'Não é bom de usar', 'Muito barato', 'Muito bom de usar'],
+    correctAnswer: 1, explanation: '太不好用了 (péssimo de usar): 不好用.'
+},
+{
+    id: 17, part: 3, section: 'listening', type: 'mc',
+    instructionChar: '第 13 到 22 题：请选出正确答案。', instructionPinyin: 'Dì 13 dào 22 tí: Qǐng xuǎnchū zhèngquè dá\'àn.',
+    instructionTrans: 'Questões 13 a 22: Escolha a resposta correta.',
+    audioChar: '女：中午吃西红柿鸡蛋面怎么样？\n男：好啊，不过冰箱里好像没有面条了。\n女：那我们现在去超市买。\n男：好的。',
+    audioPinyin: 'Nǚ: Zhōngwǔ chī xīhóngshì jīdàn miàn zěnmeyàng?\nNán: Hǎo a, búguò bīngxiāng lǐ hǎoxiàng méiyǒu miàntiáo le.\nNǚ: Nà wǒmen xiànzài qù chāoshì mǎi.\nNán: Hǎo de.',
+    audioTrans: 'Mulher: Que tal comer macarrão com tomate e ovo no almoço?\nHomem: Boa, mas parece que não tem mais macarrão na geladeira.\nMulher: Então vamos ao supermercado comprar agora.\nHomem: Ok.',
+    qChar: '问：他们中午想吃什么？', qPinyin: 'Wèn: Tāmen zhōngwǔ xiǎng chī shénme?', qTrans: 'O que eles querem comer no almoço?',
+    options: ['西红柿', '蛋糕', '鸡蛋', '面条'],
+    optionsPinyin: ['xīhóngshì', 'dàngāo', 'jīdàn', 'miàntiáo'],
+    optionsTrans: ['Tomate', 'Bolo', 'Ovo', 'Macarrão'],
+    correctAnswer: 3, explanation: 'Querem comer 西红柿鸡蛋面 (macarrão com tomate e ovo): falta 面条 (macarrão).'
+},
+{
+    id: 18, part: 3, section: 'listening', type: 'mc',
+    instructionChar: '第 13 到 22 题：请选出正确答案。', instructionPinyin: 'Dì 13 dào 22 tí: Qǐng xuǎnchū zhèngquè dá\'àn.',
+    instructionTrans: 'Questões 13 a 22: Escolha a resposta correta.',
+    audioChar: '男：现在我们店内的衣服都打八折，您看看有没有喜欢的？\n女：这条裙子不错，还有别的颜色吗？\n男：还有红色和黑色，您皮肤好，这几个颜色都适合您。\n女：给我拿条红色中号的，我试试。',
+    audioPinyin: 'Nán: Xiànzài wǒmen diàn nèi de yīfu dōu dǎ bā zhé, nín kànkan yǒu méiyǒu xǐhuan de?\nNǚ: Zhè tiáo qúnzi búcuò, hái yǒu biéde yánsè ma?\nNán: Hái yǒu hóngsè hé hēisè, nín pífū hǎo, zhè jǐ ge yánsè dōu shìhé nín.\nNǚ: Gěi wǒ ná tiáo hóngsè zhōnghào de, wǒ shìshi.',
+    audioTrans: 'Homem: As roupas da nossa loja estão com 20% de desconto; a senhora quer ver alguma?\nMulher: Esta saia é boa, tem outras cores?\nHomem: Tem vermelho e preto; sua pele é boa, essas cores combinam com a senhora.\nMulher: Me traga uma vermelha tamanho médio, vou experimentar.',
+    qChar: '问：根据对话，下列哪个正确？', qPinyin: 'Wèn: Gēnjù duìhuà, xiàliè nǎ ge zhèngquè?', qTrans: 'Qual das alternativas é correta?',
+    options: ['衣服在打折', '男的是律师', '顾客不满意', '裙子卖完了'],
+    optionsPinyin: ['yīfu zài dǎzhé', 'nán de shì lǜshī', 'gùkè bù mǎnyì', 'qúnzi màiwán le'],
+    optionsTrans: ['As roupas estão com desconto', 'O homem é advogado', 'A cliente não está satisfeita', 'A saia esgotou'],
+    correctAnswer: 0, explanation: '衣服都打八折 (as roupas estão com 20% de desconto): 衣服在打折.'
+},
+{
+    id: 19, part: 3, section: 'listening', type: 'mc',
+    instructionChar: '第 19 到 20 题是根据下面一段话：', instructionPinyin: 'Dì 19 dào 20 tí shì gēnjù xiàmiàn yí duàn huà:',
+    instructionTrans: 'As questões 19-20 baseiam-se no seguinte texto:',
+    audioChar: '王先生，您放心，只要是在我们店购买的洗衣机，一年内出现任何质量问题，我们都会免费给您修理。这是保修卡，使用中遇到什么问题，您可以通过上面的电话联系我们。',
+    audioPinyin: 'Wáng xiānsheng, nín fàngxīn, zhǐyào shì zài wǒmen diàn gòumǎi de xǐyījī, yì nián nèi chūxiàn rènhé zhìliàng wèntí, wǒmen dōu huì miǎnfèi gěi nín xiūlǐ. Zhè shì bǎoxiūkǎ, shǐyòng zhōng yùdào shénme wèntí, nín kěyǐ tōngguò shàngmiàn de diànhuà liánxì wǒmen.',
+    audioTrans: 'Senhor Wang, fique tranquilo: desde que a máquina de lavar tenha sido comprada na nossa loja, se apresentar qualquer defeito de qualidade em um ano, consertamos de graça. Este é o cartão de garantia; se tiver algum problema no uso, ligue pelo telefone que está nele.',
+    qChar: '问：王先生在买什么？', qPinyin: 'Wèn: Wáng xiānsheng zài mǎi shénme?', qTrans: 'O que o Sr. Wang está comprando?',
+    options: ['冰箱', '电视', '空调', '洗衣机'],
+    optionsPinyin: ['bīngxiāng', 'diànshì', 'kōngtiáo', 'xǐyījī'],
+    optionsTrans: ['Geladeira', 'Televisão', 'Ar-condicionado', 'Máquina de lavar'],
+    correctAnswer: 3, explanation: '在我们店购买的洗衣机 (a máquina de lavar comprada na loja): 洗衣机.'
+},
+{
+    id: 20, part: 3, section: 'listening', type: 'mc',
+    instructionChar: '第 19 到 20 题是根据下面一段话：', instructionPinyin: 'Dì 19 dào 20 tí shì gēnjù xiàmiàn yí duàn huà:',
+    instructionTrans: 'As questões 19-20 baseiam-se no seguinte texto:',
+    audioChar: '王先生，您放心，只要是在我们店购买的洗衣机，一年内出现任何质量问题，我们都会免费给您修理。这是保修卡，使用中遇到什么问题，您可以通过上面的电话联系我们。',
+    audioPinyin: '...yì nián nèi chūxiàn rènhé zhìliàng wèntí, wǒmen dōu huì miǎnfèi gěi nín xiūlǐ...',
+    audioTrans: '(mesmo texto) ... em um ano, qualquer defeito de qualidade consertamos de graça...',
+    qChar: '问：保修期是多长时间？', qPinyin: 'Wèn: Bǎoxiūqī shì duō cháng shíjiān?', qTrans: 'De quanto tempo é a garantia?',
+    options: ['一个月', '半年', '一年', '两年'],
+    optionsPinyin: ['yí gè yuè', 'bàn nián', 'yì nián', 'liǎng nián'],
+    optionsTrans: ['Um mês', 'Meio ano', 'Um ano', 'Dois anos'],
+    correctAnswer: 2, explanation: '一年内...免费给您修理 (dentro de um ano, conserto grátis): garantia de 一年.'
+},
+{
+    id: 21, part: 3, section: 'listening', type: 'mc',
+    instructionChar: '第 21 到 22 题是根据下面一段话：', instructionPinyin: 'Dì 21 dào 22 tí shì gēnjù xiàmiàn yí duàn huà:',
+    instructionTrans: 'As questões 21-22 baseiam-se no seguinte texto:',
+    audioChar: '我昨天和同事去逛街，看到一个我一直想要的包。我笑着对同事说：“就是它，终于被我找到了！”我拿起包就问售货员：“这个包怎么卖？”这时，旁边一个帅哥很客气地对我说：“你喜欢这个包？”我说是。他笑着说：“可是这是我的包。”',
+    audioPinyin: 'Wǒ zuótiān hé tóngshì qù guàngjiē, kàndào yí gè wǒ yìzhí xiǎng yào de bāo. Wǒ xiàozhe duì tóngshì shuō: “Jiùshì tā, zhōngyú bèi wǒ zhǎodào le!” Wǒ náqǐ bāo jiù wèn shòuhuòyuán: “Zhège bāo zěnme mài?” Zhèshí, pángbiān yí gè shuàigē hěn kèqi de duì wǒ shuō: “Nǐ xǐhuan zhège bāo?” Wǒ shuō shì. Tā xiàozhe shuō: “Kěshì zhè shì wǒ de bāo.”',
+    audioTrans: 'Ontem fui às compras com uma colega e vi uma bolsa que eu sempre quis. Sorrindo, disse à colega: "É esta, finalmente a achei!" Peguei a bolsa e perguntei à vendedora: "Quanto custa?" Nesse momento, um rapaz bonito ao lado disse educadamente: "Você gosta desta bolsa?" Eu disse que sim. Ele sorriu e disse: "Mas esta é a minha bolsa."',
+    qChar: '问：看到那个包，说话人怎么样？', qPinyin: 'Wèn: Kàndào nàge bāo, shuōhuà rén zěnmeyàng?', qTrans: 'Ao ver a bolsa, como ficou quem fala?',
+    options: ['很高兴', '很难过', '不感兴趣', '很有礼貌'],
+    optionsPinyin: ['hěn gāoxìng', 'hěn nánguò', 'bù gǎn xìngqù', 'hěn yǒu lǐmào'],
+    optionsTrans: ['Muito feliz', 'Muito triste', 'Sem interesse', 'Muito educada'],
+    correctAnswer: 0, explanation: '终于被我找到了 e sorriu: ela ficou 很高兴 (muito feliz).'
+},
+{
+    id: 22, part: 3, section: 'listening', type: 'mc',
+    instructionChar: '第 21 到 22 题是根据下面一段话：', instructionPinyin: 'Dì 21 dào 22 tí shì gēnjù xiàmiàn yí duàn huà:',
+    instructionTrans: 'As questões 21-22 baseiam-se no seguinte texto:',
+    audioChar: '我昨天和同事去逛街，看到一个我一直想要的包。我笑着对同事说：“就是它，终于被我找到了！”我拿起包就问售货员：“这个包怎么卖？”这时，旁边一个帅哥很客气地对我说：“你喜欢这个包？”我说是。他笑着说：“可是这是我的包。”',
+    audioPinyin: '...pángbiān yí gè shuàigē...“Kěshì zhè shì wǒ de bāo.”',
+    audioTrans: '(mesmo texto) ... um rapaz ao lado ... "Mas esta é a minha bolsa."',
+    qChar: '问：那个包是谁的？', qPinyin: 'Wèn: Nàge bāo shì shuí de?', qTrans: 'De quem era a bolsa?',
+    options: ['商店的', '同事的', '售货员的', '一位顾客的'],
+    optionsPinyin: ['shāngdiàn de', 'tóngshì de', 'shòuhuòyuán de', 'yí wèi gùkè de'],
+    optionsTrans: ['Da loja', 'Da colega', 'Da vendedora', 'De um cliente'],
+    correctAnswer: 3, explanation: 'O rapaz (outro cliente) diz 这是我的包: a bolsa era 一位顾客的 (de um cliente).'
+},
+{ type: 'results', section: 'listening', heading: 'Resultado — 听力 (Escuta)' },
+/* ============ SECTION: READING ============ */
+{
+    type: 'section', section: 'reading', badge: 'Teste 2 de 3', icon: ICON_BOOK,
+    titleCn: '阅读', titlePt: 'Leitura',
+    desc: '21 questões em 3 partes: completar lacunas com a palavra correta, ordenar frases logicamente e múltipla escolha sobre textos. Clique nas palavras para ver pinyin e tradução.'
+},
+/* ---- R Part 1A intro ---- */
+{
+    type: 'intro', part: 1, section: 'reading', title: '第一部分', titlePinyin: 'Dì-yī bùfèn',
+    instructions: '第 23 到 26 题：选词填空。', instructionsPinyin: 'Dì 23 dào 26 tí: Xuǎn cí tián kòng.',
+    examples: [{
+        text: '选项 (Opções)：A 情况  B 获得  C 举办  D 坚持  E 所有',
+        pinyin: 'A qíngkuàng  B huòdé  C jǔbàn  D jiānchí  E suǒyǒu',
+        trans: 'A situação  B obter  C realizar  D persistir  E todos',
+        q: '例如：她每天都（ D ）走路上下班，所以身体一直很不错。',
+        qPinyin: 'Lìrú: Tā měitiān dōu ( D ) zǒulù shàngxiàbān...',
+        qTrans: 'Exemplo: Ela ( D persiste ) em ir a pé ao trabalho todo dia, por isso tem boa saúde.', ans: 'D'
+    }]
+},
+{
+    id: 23, part: 1, section: 'reading', type: 'fill',
+    instructionChar: '第 23 到 26 题：选词填空。', instructionPinyin: 'Dì 23 dào 26 tí: Xuǎn cí tián kòng.',
+    instructionTrans: 'Questões 23 a 26: Escolha a palavra para a lacuna.',
+    optionsBank: ['A 情况', 'B 获得', 'C 举办', 'D 坚持', 'E 所有'],
+    optionsBankPinyin: ['A qíngkuàng', 'B huòdé', 'C jǔbàn', 'D jiānchí', 'E suǒyǒu'],
+    optionsBankTrans: ['A situação', 'B obter/conseguir', 'C realizar/organizar', 'D persistir', 'E todos/tudo'],
+    qChar: '23. 你应该学会说“不”，而不是（ [BLANK] ）的要求都接受。',
+    qPinyin: '23. Nǐ yīnggāi xuéhuì shuō “bù”, ér bú shì ( [BLANK] ) de yāoqiú dōu jiēshòu.',
+    qTrans: '23. Você deveria aprender a dizer "não", em vez de aceitar ( todas ) as exigências.',
+    correctAnswer: 'E', explanation: '所有的要求 (todas as exigências) = 所有.'
+},
+{
+    id: 24, part: 1, section: 'reading', type: 'fill',
+    instructionChar: '第 23 到 26 题：选词填空。', instructionPinyin: 'Dì 23 dào 26 tí: Xuǎn cí tián kòng.',
+    instructionTrans: 'Questões 23 a 26: Escolha a palavra para a lacuna.',
+    optionsBank: ['A 情况', 'B 获得', 'C 举办', 'D 坚持', 'E 所有'],
+    optionsBankPinyin: ['A qíngkuàng', 'B huòdé', 'C jǔbàn', 'D jiānchí', 'E suǒyǒu'],
+    optionsBankTrans: ['A situação', 'B obter/conseguir', 'C realizar/organizar', 'D persistir', 'E todos/tudo'],
+    qChar: '24. 没想到她第一次参加比赛就（ [BLANK] ）了这么大的成功。',
+    qPinyin: '24. Méi xiǎngdào tā dì yī cì cānjiā bǐsài jiù ( [BLANK] ) le zhème dà de chénggōng.',
+    qTrans: '24. Não imaginava que logo na primeira competição ela ( obteria ) um sucesso tão grande.',
+    correctAnswer: 'B', explanation: '获得成功 (obter sucesso) = 获得.'
+},
+{
+    id: 25, part: 1, section: 'reading', type: 'fill',
+    instructionChar: '第 23 到 26 题：选词填空。', instructionPinyin: 'Dì 23 dào 26 tí: Xuǎn cí tián kòng.',
+    instructionTrans: 'Questões 23 a 26: Escolha a palavra para a lacuna.',
+    optionsBank: ['A 情况', 'B 获得', 'C 举办', 'D 坚持', 'E 所有'],
+    optionsBankPinyin: ['A qíngkuàng', 'B huòdé', 'C jǔbàn', 'D jiānchí', 'E suǒyǒu'],
+    optionsBankTrans: ['A situação', 'B obter/conseguir', 'C realizar/organizar', 'D persistir', 'E todos/tudo'],
+    qChar: '25. 您说的这个（ [BLANK] ）很重要，我们今天就安排人去调查。',
+    qPinyin: '25. Nín shuō de zhège ( [BLANK] ) hěn zhòngyào, wǒmen jīntiān jiù ānpái rén qù diàochá.',
+    qTrans: '25. Esta ( situação ) que o senhor mencionou é importante; hoje mesmo organizaremos gente para investigar.',
+    correctAnswer: 'A', explanation: '这个情况 (esta situação) = 情况.'
+},
+{
+    id: 26, part: 1, section: 'reading', type: 'fill',
+    instructionChar: '第 23 到 26 题：选词填空。', instructionPinyin: 'Dì 23 dào 26 tí: Xuǎn cí tián kòng.',
+    instructionTrans: 'Questões 23 a 26: Escolha a palavra para a lacuna.',
+    optionsBank: ['A 情况', 'B 获得', 'C 举办', 'D 坚持', 'E 所有'],
+    optionsBankPinyin: ['A qíngkuàng', 'B huòdé', 'C jǔbàn', 'D jiānchí', 'E suǒyǒu'],
+    optionsBankTrans: ['A situação', 'B obter/conseguir', 'C realizar/organizar', 'D persistir', 'E todos/tudo'],
+    qChar: '26. 我们学校经常会（ [BLANK] ）一些活动来丰富学生们的生活。',
+    qPinyin: '26. Wǒmen xuéxiào jīngcháng huì ( [BLANK] ) yìxiē huódòng lái fēngfù xuéshengmen de shēnghuó.',
+    qTrans: '26. Nossa escola frequentemente ( realiza ) atividades para enriquecer a vida dos estudantes.',
+    correctAnswer: 'C', explanation: '举办活动 (realizar atividades) = 举办.'
+},
+/* ---- R Part 1B intro ---- */
+{
+    type: 'intro', part: 1, section: 'reading', title: '第一部分', titlePinyin: 'Dì-yī bùfèn',
+    instructions: '第 27 到 30 题：选词填空。', instructionsPinyin: 'Dì 27 dào 30 tí: Xuǎn cí tián kòng.',
+    examples: [{
+        text: '选项 (Opções)：A 支持  B 方面  C 温度  D 竟然  E 小说',
+        pinyin: 'A zhīchí  B fāngmiàn  C wēndù  D jìngrán  E xiǎoshuō',
+        trans: 'A apoio  B aspecto  C temperatura  D inesperadamente  E romance',
+        q: '例如：A：今天真冷啊，好像白天最高（ C ）才 2℃。B：刚才电视里说明天更冷。',
+        qPinyin: 'Lìrú: A: Jīntiān zhēn lěng a, hǎoxiàng báitiān zuìgāo ( C ) cái 2℃...',
+        qTrans: 'Exemplo: A: Que frio, a ( C temperatura ) máxima foi só 2°C. B: Disseram que amanhã será mais frio.', ans: 'C'
+    }]
+},
+{
+    id: 27, part: 1, section: 'reading', type: 'fill',
+    instructionChar: '第 27 到 30 题：选词填空。', instructionPinyin: 'Dì 27 dào 30 tí: Xuǎn cí tián kòng.',
+    instructionTrans: 'Questões 27 a 30: Escolha a palavra para a lacuna.',
+    optionsBank: ['A 支持', 'B 方面', 'C 温度', 'D 竟然', 'E 小说'],
+    optionsBankPinyin: ['A zhīchí', 'B fāngmiàn', 'C wēndù', 'D jìngrán', 'E xiǎoshuō'],
+    optionsBankTrans: ['A apoiar/apoio', 'B aspecto/área', 'C temperatura', 'D inesperadamente', 'E romance/livro'],
+    qChar: '27. A：呀，你的这个行李箱（ [BLANK] ）跟我的完全一样。\nB：那是我去年夏天买的，你是什么时候买的？',
+    qPinyin: '27. A: Ya, nǐ de zhège xínglǐxiāng ( [BLANK] ) gēn wǒ de wánquán yíyàng.\nB: Nà shì wǒ qùnián xiàtiān mǎi de...',
+    qTrans: '27. A: Uau, essa sua mala é ( inesperadamente ) exatamente igual à minha. B: Comprei no verão passado, e você?',
+    correctAnswer: 'D', explanation: '竟然跟我的完全一样 (inesperadamente igual à minha) = 竟然.'
+},
+{
+    id: 28, part: 1, section: 'reading', type: 'fill',
+    instructionChar: '第 27 到 30 题：选词填空。', instructionPinyin: 'Dì 27 dào 30 tí: Xuǎn cí tián kòng.',
+    instructionTrans: 'Questões 27 a 30: Escolha a palavra para a lacuna.',
+    optionsBank: ['A 支持', 'B 方面', 'C 温度', 'D 竟然', 'E 小说'],
+    optionsBankPinyin: ['A zhīchí', 'B fāngmiàn', 'C wēndù', 'D jìngrán', 'E xiǎoshuō'],
+    optionsBankTrans: ['A apoiar/apoio', 'B aspecto/área', 'C temperatura', 'D inesperadamente', 'E romance/livro'],
+    qChar: '28. A：这本（ [BLANK] ）很有意思，我差不多明天就能看完，后天见面时就可以还你。\nB：不着急，你慢慢看，周末给我吧。',
+    qPinyin: '28. A: Zhè běn ( [BLANK] ) hěn yǒu yìsi, wǒ chàbuduō míngtiān jiù néng kàn wán...\nB: Bù zháojí, nǐ mànman kàn...',
+    qTrans: '28. A: Este ( romance ) é interessante, termino amanhã e devolvo depois de amanhã. B: Sem pressa, leia devagar.',
+    correctAnswer: 'E', explanation: '这本小说 (este romance/livro) = 小说.'
+},
+{
+    id: 29, part: 1, section: 'reading', type: 'fill',
+    instructionChar: '第 27 到 30 题：选词填空。', instructionPinyin: 'Dì 27 dào 30 tí: Xuǎn cí tián kòng.',
+    instructionTrans: 'Questões 27 a 30: Escolha a palavra para a lacuna.',
+    optionsBank: ['A 支持', 'B 方面', 'C 温度', 'D 竟然', 'E 小说'],
+    optionsBankPinyin: ['A zhīchí', 'B fāngmiàn', 'C wēndù', 'D jìngrán', 'E xiǎoshuō'],
+    optionsBankTrans: ['A apoiar/apoio', 'B aspecto/área', 'C temperatura', 'D inesperadamente', 'E romance/livro'],
+    qChar: '29. A：王教授，感谢您对我们工作的（ [BLANK] ）。\nB：别客气，这是我应该做的。',
+    qPinyin: '29. A: Wáng jiàoshòu, gǎnxiè nín duì wǒmen gōngzuò de ( [BLANK] ).\nB: Bié kèqi, zhè shì wǒ yīnggāi zuò de.',
+    qTrans: '29. A: Professor Wang, obrigado pelo seu ( apoio ) ao nosso trabalho. B: De nada, é o meu dever.',
+    correctAnswer: 'A', explanation: '对我们工作的支持 (apoio ao nosso trabalho) = 支持.'
+},
+{
+    id: 30, part: 1, section: 'reading', type: 'fill',
+    instructionChar: '第 27 到 30 题：选词填空。', instructionPinyin: 'Dì 27 dào 30 tí: Xuǎn cí tián kòng.',
+    instructionTrans: 'Questões 27 a 30: Escolha a palavra para a lacuna.',
+    optionsBank: ['A 支持', 'B 方面', 'C 温度', 'D 竟然', 'E 小说'],
+    optionsBankPinyin: ['A zhīchí', 'B fāngmiàn', 'C wēndù', 'D jìngrán', 'E xiǎoshuō'],
+    optionsBankTrans: ['A apoiar/apoio', 'B aspecto/área', 'C temperatura', 'D inesperadamente', 'E romance/livro'],
+    qChar: '30. A：你有没有李律师的电话？我想问他几个法律（ [BLANK] ）的问题。\nB：有，我发到你手机上，你直接跟他联系就可以。',
+    qPinyin: '30. A: Nǐ yǒu méiyǒu Lǐ lǜshī de diànhuà? Wǒ xiǎng wèn tā jǐ ge fǎlǜ ( [BLANK] ) de wèntí.\nB: Yǒu, wǒ fā dào nǐ shǒujī shang...',
+    qTrans: '30. A: Você tem o telefone do advogado Li? Quero perguntar algumas questões da ( área ) jurídica. B: Tenho, mando para o seu celular.',
+    correctAnswer: 'B', explanation: '法律方面的问题 (questões da área jurídica) = 方面.'
+},
+/* ---- R Part 2 intro ---- */
+{
+    type: 'intro', part: 2, section: 'reading', title: '第二部分', titlePinyin: 'Dì-èr bùfèn',
+    instructions: '第 31 到 34 题：排列顺序。', instructionsPinyin: 'Dì 31 dào 34 tí: Páiliè shùnxù.',
+    examples: [{
+        text: 'A 可是今天起晚了<br>B 平时我骑自行车上下班<br>C 所以就打车来公司',
+        pinyin: 'A Kěshì jīntiān qǐ wǎn le<br>B Píngshí wǒ qí zìxíngchē shàngxiàbān<br>C Suǒyǐ jiù dǎchē lái gōngsī',
+        trans: 'A Mas hoje acordei tarde<br>B Normalmente vou de bicicleta<br>C Por isso vim de táxi',
+        q: 'Coloque as frases em ordem lógica.', qPinyin: '...', qTrans: '...', ans: 'B A C'
+    }]
+},
+{
+    id: 31, part: 2, section: 'reading', type: 'order',
+    instructionChar: '第 31 到 34 题：排列顺序。', instructionPinyin: 'Dì 31 dào 34 tí: Páiliè shùnxù.',
+    instructionTrans: 'Questões 31 a 34: Coloque as frases em ordem lógica.',
+    options: {
+        A: { c: '现在只卖 300 块', p: 'xiànzài zhǐ mài 300 kuài', t: 'Agora custa apenas 300 yuans' },
+        B: { c: '原价是现在的两倍多呢，我找一件您试试吧', p: 'yuánjià shì xiànzài de liǎng bèi duō ne, wǒ zhǎo yí jiàn nín shìshi ba', t: 'O preço original era mais que o dobro; vou buscar uma para a senhora experimentar' },
+        C: { c: '这种裙子今年非常流行，质量很好', p: 'zhè zhǒng qúnzi jīnnián fēicháng liúxíng, zhìliàng hěn hǎo', t: 'Este tipo de saia está muito na moda este ano, de ótima qualidade' }
+    },
+    qChar: '31．', qPinyin: '', qTrans: '', correctAnswer: 'CAB',
+    explanation: 'C apresenta a saia (moda/qualidade), A dá o preço atual (300), B compara com o preço original e conclui o convite para experimentar.'
+},
+{
+    id: 32, part: 2, section: 'reading', type: 'order',
+    instructionChar: '第 31 到 34 题：排列顺序。', instructionPinyin: 'Dì 31 dào 34 tí: Páiliè shùnxù.',
+    instructionTrans: 'Questões 31 a 34: Coloque as frases em ordem lógica.',
+    options: {
+        A: { c: '他是我大学时的同学', p: 'tā shì wǒ dàxué shí de tóngxué', t: 'Ele é meu colega da época da faculdade' },
+        B: { c: '毕业后我们就再也没联系过', p: 'bìyè hòu wǒmen jiù zài yě méi liánxì guò', t: 'Depois de formados, nunca mais mantivemos contato' },
+        C: { c: '没想到中午我去取护照时竟然遇到了他', p: 'méi xiǎngdào zhōngwǔ wǒ qù qǔ hùzhào shí jìngrán yùdào le tā', t: 'Ao meio-dia, ao buscar o passaporte, inesperadamente o encontrei' }
+    },
+    qChar: '32．', qPinyin: '', qTrans: '', correctAnswer: 'ABC',
+    explanation: 'A apresenta quem é (colega de faculdade), B dá o pano de fundo (sem contato), C traz o desfecho (reencontro inesperado).'
+},
+{
+    id: 33, part: 2, section: 'reading', type: 'order',
+    instructionChar: '第 31 到 34 题：排列顺序。', instructionPinyin: 'Dì 31 dào 34 tí: Páiliè shùnxù.',
+    instructionTrans: 'Questões 31 a 34: Coloque as frases em ordem lógica.',
+    options: {
+        A: { c: '但是他很诚实', p: 'dànshì tā hěn chéngshí', t: 'Mas ele é muito honesto' },
+        B: { c: '小关的脾气有时候是有点儿差', p: 'Xiǎo Guān de píqi yǒu shíhou shì yǒudiǎnr chà', t: 'O temperamento do Xiao Guan às vezes é um pouco ruim' },
+        C: { c: '是个值得相信的人', p: 'shì ge zhídé xiāngxìn de rén', t: 'É uma pessoa digna de confiança' }
+    },
+    qChar: '33．', qPinyin: '', qTrans: '', correctAnswer: 'BAC',
+    explanation: 'B introduz o defeito (temperamento), A traz o contraste com 但是 (mas é honesto), C conclui (pessoa confiável).'
+},
+{
+    id: 34, part: 2, section: 'reading', type: 'order',
+    instructionChar: '第 31 到 34 题：排列顺序。', instructionPinyin: 'Dì 31 dào 34 tí: Páiliè shùnxù.',
+    instructionTrans: 'Questões 31 a 34: Coloque as frases em ordem lógica.',
+    options: {
+        A: { c: '这种情况下，就需要及时交流', p: 'zhè zhǒng qíngkuàng xià, jiù xūyào jíshí jiāoliú', t: 'Nesta situação, é preciso se comunicar a tempo' },
+        B: { c: '两个人在一起，总会遇到问题', p: 'liǎng ge rén zài yìqǐ, zǒng huì yùdào wèntí', t: 'Duas pessoas juntas sempre encontram problemas' },
+        C: { c: '如果不这样的话，关系就可能会越来越远', p: 'rúguǒ bú zhèyàng de huà, guānxi jiù kěnéng huì yuè lái yuè yuǎn', t: 'Se não for assim, a relação pode ficar cada vez mais distante' }
+    },
+    qChar: '34．', qPinyin: '', qTrans: '', correctAnswer: 'BAC',
+    explanation: 'B apresenta o problema geral, A dá a solução (comunicar-se), C mostra a consequência de não fazê-lo.'
+},
+/* ---- R Part 3 intro ---- */
+{
+    type: 'intro', part: 3, section: 'reading', title: '第三部分', titlePinyin: 'Dì-sān bùfèn',
+    instructions: '第 35 到 43 题：请选出正确答案。', instructionsPinyin: 'Dì 35 dào 43 tí: Qǐng xuǎnchū zhèngquè dá\'àn.',
+    examples: [{
+        text: '她很活泼，说话很有趣，总能给我们带来快乐，我们都很喜欢和她在一起。',
+        pinyin: 'Tā hěn huópō, shuōhuà hěn yǒuqù, zǒng néng gěi wǒmen dàilái kuàilè...',
+        trans: 'Ela é animada, fala de forma divertida e sempre nos traz alegria; gostamos de estar com ela.',
+        q: '★ 她是个什么样的人？(A 幽默 | B 马虎 | C 骄傲 | D 害羞)',
+        qPinyin: '★ Tā shì gè shénmeyàng de rén?',
+        qTrans: '★ Que tipo de pessoa ela é? (A Humorada | B Descuidada | C Orgulhosa | D Tímida)', ans: 'A 幽默'
+    }]
+},
+{
+    id: 35, part: 3, section: 'reading', type: 'mcq',
+    instructionChar: '第 35 到 43 题：请选出正确答案。', instructionPinyin: 'Dì 35 dào 43 tí: Qǐng xuǎnchū zhèngquè dá\'àn.',
+    instructionTrans: 'Questões 35 a 43: Escolha a resposta correta.',
+    passageChar: '实际上，售货员太热情地为顾客介绍这、介绍那，会让我觉得很不舒服。许多人在逛商场时喜欢自己看、自己选，而不愿意总是被别人打扰。',
+    passagePinyin: 'Shíjìshang, shòuhuòyuán tài rèqíng de wèi gùkè jièshào zhè, jièshào nà, huì ràng wǒ juéde hěn bù shūfu. Xǔduō rén zài guàng shāngchǎng shí xǐhuan zìjǐ kàn, zìjǐ xuǎn, ér bú yuànyì zǒngshì bèi biérén dǎrǎo.',
+    passageTrans: 'Na verdade, vendedores que apresentam isto e aquilo com muito entusiasmo me deixam desconfortável. Muita gente, ao passear no shopping, gosta de olhar e escolher sozinha, e não quer ser sempre incomodada.',
+    qChar: '35. ★ “我”在逛商场时：', qPinyin: '35. ★ “Wǒ” zài guàng shāngchǎng shí:', qTrans: '35. ★ "Eu", ao passear no shopping:',
+    options: ['A 觉得无聊', 'B 喜欢自己选', 'C 很少考虑价格', 'D 喜欢售货员介绍'],
+    optionsPinyin: ['A juéde wúliáo', 'B xǐhuan zìjǐ xuǎn', 'C hěn shǎo kǎolǜ jiàgé', 'D xǐhuan shòuhuòyuán jièshào'],
+    optionsTrans: ['A Acho entediante', 'B Gosto de escolher sozinho', 'C Raramente considero o preço', 'D Gosto que o vendedor apresente'],
+    correctAnswer: 1, explanation: '喜欢自己看、自己选 (gosta de olhar e escolher sozinha): 喜欢自己选.'
+},
+{
+    id: 36, part: 3, section: 'reading', type: 'mcq',
+    instructionChar: '第 35 到 43 题：请选出正确答案。', instructionPinyin: 'Dì 35 dào 43 tí: Qǐng xuǎnchū zhèngquè dá\'àn.',
+    instructionTrans: 'Questões 35 a 43: Escolha a resposta correta.',
+    passageChar: '做生意讲的是“一分钱一分货”，意思是说货物的质量和价格有很大的关系，所以人们经常说“便宜没好货，好货不便宜”。',
+    passagePinyin: 'Zuò shēngyi jiǎng de shì “yì fēn qián yì fēn huò”, yìsi shì shuō huòwù de zhìliàng hé jiàgé yǒu hěn dà de guānxi, suǒyǐ rénmen jīngcháng shuō “piányi méi hǎo huò, hǎo huò bù piányi”.',
+    passageTrans: 'Nos negócios diz-se "você recebe pelo que paga": a qualidade da mercadoria e o preço têm grande relação; por isso se diz "o barato não é bom e o bom não é barato".',
+    qChar: '36. ★ 一般情况下，贵的东西：', qPinyin: '36. ★ Yìbān qíngkuàng xià, guì de dōngxi:', qTrans: '36. ★ Geralmente, as coisas caras:',
+    options: ['A 广告多', 'B 赚得多', 'C 不好卖', 'D 质量好'],
+    optionsPinyin: ['A guǎnggào duō', 'B zhuàn de duō', 'C bù hǎo mài', 'D zhìliàng hǎo'],
+    optionsTrans: ['A Têm muitos anúncios', 'B Dão muito lucro', 'C Não vendem bem', 'D Têm boa qualidade'],
+    correctAnswer: 3, explanation: '好货不便宜 (o bom não é barato): as coisas caras têm 质量好 (boa qualidade).'
+},
+{
+    id: 37, part: 3, section: 'reading', type: 'mcq',
+    instructionChar: '第 35 到 43 题：请选出正确答案。', instructionPinyin: 'Dì 35 dào 43 tí: Qǐng xuǎnchū zhèngquè dá\'àn.',
+    instructionTrans: 'Questões 35 a 43: Escolha a resposta correta.',
+    passageChar: '每到换季或者节假日的时候，各大商场都会举办一些打折活动来吸引顾客。这样人们就能花很少的钱买到质量不错的东西，有时一样的东西甚至能比平时少花一半的钱。',
+    passagePinyin: 'Měi dào huànjì huòzhě jiéjiàrì de shíhou, gè dà shāngchǎng dōu huì jǔbàn yìxiē dǎzhé huódòng lái xīyǐn gùkè. Zhèyàng rénmen jiù néng huā hěn shǎo de qián mǎidào zhìliàng búcuò de dōngxi, yǒushí yíyàng de dōngxi shènzhì néng bǐ píngshí shǎo huā yíbàn de qián.',
+    passageTrans: 'Nas mudanças de estação ou feriados, os grandes shoppings promovem descontos para atrair clientes. Assim, gasta-se pouco por coisas de boa qualidade; às vezes, pelo mesmo produto, paga-se metade do valor normal.',
+    qChar: '37. ★ 商场举办活动是为了：', qPinyin: '37. ★ Shāngchǎng jǔbàn huódòng shì wèile:', qTrans: '37. ★ O shopping realiza eventos para:',
+    options: ['A 检查质量', 'B 吸引顾客', 'C 举行招聘会', 'D 提高服务水平'],
+    optionsPinyin: ['A jiǎnchá zhìliàng', 'B xīyǐn gùkè', 'C jǔxíng zhāopìnhuì', 'D tígāo fúwù shuǐpíng'],
+    optionsTrans: ['A Inspecionar a qualidade', 'B Atrair clientes', 'C Fazer feira de empregos', 'D Elevar o nível do serviço'],
+    correctAnswer: 1, explanation: '打折活动来吸引顾客 (descontos para atrair clientes): 吸引顾客.'
+},
+{
+    id: 38, part: 3, section: 'reading', type: 'mcq',
+    instructionChar: '第 35 到 43 题：请选出正确答案。', instructionPinyin: 'Dì 35 dào 43 tí: Qǐng xuǎnchū zhèngquè dá\'àn.',
+    instructionTrans: 'Questões 35 a 43: Escolha a resposta correta.',
+    passageChar: '如果一个星期内发现有任何质量问题，我们都可以免费为您换，但是购物小票一定要留好。如果没有购物小票，我们是没法给您换的。',
+    passagePinyin: 'Rúguǒ yí gè xīngqī nèi fāxiàn yǒu rènhé zhìliàng wèntí, wǒmen dōu kěyǐ miǎnfèi wèi nín huàn, dànshì gòuwù xiǎopiào yídìng yào liú hǎo. Rúguǒ méiyǒu gòuwù xiǎopiào, wǒmen shì méifǎ gěi nín huàn de.',
+    passageTrans: 'Se em uma semana surgir qualquer defeito de qualidade, trocamos de graça, mas é preciso guardar bem o recibo de compra. Sem o recibo, não temos como trocar.',
+    qChar: '38. ★ 说话人提醒他：', qPinyin: '38. ★ Shuōhuà rén tíxǐng tā:', qTrans: '38. ★ Quem fala o lembra de:',
+    options: ['A 看购物小票', 'B 留着购物小票', 'C 一个月以内换', 'D 东西不能换'],
+    optionsPinyin: ['A kàn gòuwù xiǎopiào', 'B liúzhe gòuwù xiǎopiào', 'C yí gè yuè yǐnèi huàn', 'D dōngxi bù néng huàn'],
+    optionsTrans: ['A Olhar o recibo', 'B Guardar o recibo', 'C Trocar em um mês', 'D A coisa não pode ser trocada'],
+    correctAnswer: 1, explanation: '购物小票一定要留好 (guarde bem o recibo): 留着购物小票.'
+},
+{
+    id: 39, part: 3, section: 'reading', type: 'mcq',
+    instructionChar: '第 35 到 43 题：请选出正确答案。', instructionPinyin: 'Dì 35 dào 43 tí: Qǐng xuǎnchū zhèngquè dá\'àn.',
+    instructionTrans: 'Questões 35 a 43: Escolha a resposta correta.',
+    passageChar: '小姐，这些菜是绿色食品，不仅很好吃，而且对身体也很有好处，所以价格要比其他菜贵一些。',
+    passagePinyin: 'Xiǎojiě, zhèxiē cài shì lǜsè shípǐn, bùjǐn hěn hǎochī, érqiě duì shēntǐ yě hěn yǒu hǎochù, suǒyǐ jiàgé yào bǐ qítā cài guì yìxiē.',
+    passageTrans: 'Senhorita, estes vegetais são orgânicos: não só são saborosos, como também fazem bem à saúde; por isso são um pouco mais caros que os outros.',
+    qChar: '39. ★ 这些菜的特点是：', qPinyin: '39. ★ Zhèxiē cài de tèdiǎn shì:', qTrans: '39. ★ A característica desses vegetais é:',
+    options: ['A 干净', 'B 便宜', 'C 味道不太好', 'D 对身体好'],
+    optionsPinyin: ['A gānjìng', 'B piányi', 'C wèidào bú tài hǎo', 'D duì shēntǐ hǎo'],
+    optionsTrans: ['A Limpos', 'B Baratos', 'C Sabor não muito bom', 'D Fazem bem à saúde'],
+    correctAnswer: 3, explanation: '对身体也很有好处 (fazem bem à saúde): 对身体好.'
+},
+{
+    id: 40, part: 3, section: 'reading', type: 'mcq',
+    instructionChar: '第 40 到 41 题是根据下面一段话：', instructionPinyin: 'Dì 40 dào 41 tí shì gēnjù xiàmiàn yī duàn huà:',
+    instructionTrans: 'As questões 40-41 baseiam-se no seguinte texto:',
+    passageChar: '顾客朋友们，本超市现举行“购物送好礼”活动，购物满 100 元即可获得可乐一瓶，满 500 元可获得葡萄酒一瓶。另外，还有水果打折活动，其中，苹果 9 折，葡萄 8 折，香蕉、西瓜 6 折。欢迎选购！祝您购物愉快！',
+    passagePinyin: 'Gùkè péngyoumen, běn chāoshì xiàn jǔxíng “gòuwù sòng hǎo lǐ” huódòng, gòuwù mǎn 100 yuán jí kě huòdé kělè yì píng, mǎn 500 yuán kě huòdé pútaojiǔ yì píng. Lìngwài, hái yǒu shuǐguǒ dǎzhé huódòng, qízhōng, píngguǒ 9 zhé, pútao 8 zhé, xiāngjiāo, xīguā 6 zhé. Huānyíng xuǎngòu! Zhù nín gòuwù yúkuài!',
+    passageTrans: 'Amigos clientes, o supermercado realiza a promoção "Compre e Ganhe": compras de 100 yuans dão uma coca-cola; de 500 yuans, um vinho. Há também desconto em frutas: maçãs 10% off, uvas 20% off, bananas e melancias 40% off. Sejam bem-vindos! Boas compras!',
+    qChar: '40. ★ 购物满 100 元能获得什么礼物？', qPinyin: '40. ★ Gòuwù mǎn 100 yuán néng huòdé shénme lǐwù?', qTrans: '40. ★ Comprando 100 yuans, qual brinde se ganha?',
+    options: ['A 西红柿', 'B 葡萄酒', 'C 可乐', 'D 西瓜'],
+    optionsPinyin: ['A xīhóngshì', 'B pútaojiǔ', 'C kělè', 'D xīguā'],
+    optionsTrans: ['A Tomate', 'B Vinho', 'C Coca-cola', 'D Melancia'],
+    correctAnswer: 2, explanation: '购物满 100 元即可获得可乐一瓶 (100 yuans = uma coca): 可乐.'
+},
+{
+    id: 41, part: 3, section: 'reading', type: 'mcq',
+    instructionChar: '第 40 到 41 题是根据下面一段话：', instructionPinyin: 'Dì 40 dào 41 tí shì gēnjù xiàmiàn yī duàn huà:',
+    instructionTrans: 'As questões 40-41 baseiam-se no seguinte texto:',
+    passageChar: '顾客朋友们，本超市现举行“购物送好礼”活动，购物满 100 元即可获得可乐一瓶，满 500 元可获得葡萄酒一瓶。另外，还有水果打折活动，其中，苹果 9 折，葡萄 8 折，香蕉、西瓜 6 折。欢迎选购！祝您购物愉快！',
+    passagePinyin: '...hái yǒu shuǐguǒ dǎzhé huódòng, qízhōng, píngguǒ 9 zhé, pútao 8 zhé, xiāngjiāo, xīguā 6 zhé...',
+    passageTrans: '(mesmo texto) ... há desconto em frutas: maçãs 10% off, uvas 20% off, bananas e melancias 40% off...',
+    qChar: '41. ★ 根据这段话，可以知道：', qPinyin: '41. ★ Gēnjù zhè duàn huà, kěyǐ zhīdào:', qTrans: '41. ★ Segundo o texto, sabe-se que:',
+    options: ['A 超市生意很好', 'B 葡萄酒半价', 'C 有些水果打折', 'D 饮料免费'],
+    optionsPinyin: ['A chāoshì shēngyi hěn hǎo', 'B pútaojiǔ bànjià', 'C yǒuxiē shuǐguǒ dǎzhé', 'D yǐnliào miǎnfèi'],
+    optionsTrans: ['A O supermercado vende muito', 'B O vinho está pela metade', 'C Algumas frutas com desconto', 'D As bebidas são grátis'],
+    correctAnswer: 2, explanation: '水果打折活动 (desconto em frutas): 有些水果打折.'
+},
+{
+    id: 42, part: 3, section: 'reading', type: 'mcq',
+    instructionChar: '第 42 到 43 题是根据下面一段话：', instructionPinyin: 'Dì 42 dào 43 tí shì gēnjù xiàmiàn yī duàn huà:',
+    instructionTrans: 'As questões 42-43 baseiam-se no seguinte texto:',
+    passageChar: '你卖的东西可不可以比别人卖的价格高？这主要要看东西的质量。如果质量比别人的好，那么价格比别人的贵一点儿也没关系。另外，环境和服务水平也很重要。质量完全一样的东西，但如果环境和服务更好，那么即使贵一点儿，大家也能接受。',
+    passagePinyin: 'Nǐ mài de dōngxi kě bù kěyǐ bǐ biérén mài de jiàgé gāo? Zhè zhǔyào yào kàn dōngxi de zhìliàng. Rúguǒ zhìliàng bǐ biérén de hǎo, nàme jiàgé bǐ biérén de guì yìdiǎnr yě méi guānxi. Lìngwài, huánjìng hé fúwù shuǐpíng yě hěn zhòngyào. Zhìliàng wánquán yíyàng de dōngxi, dàn rúguǒ huánjìng hé fúwù gèng hǎo, nàme jíshǐ guì yìdiǎnr, dàjiā yě néng jiēshòu.',
+    passageTrans: 'Suas coisas podem ser vendidas mais caro que as dos outros? Depende principalmente da qualidade. Se a qualidade for melhor, um preço um pouco mais alto não é problema. Além disso, o ambiente e o serviço também importam. Para produtos de qualidade igual, se o ambiente e o serviço forem melhores, mesmo mais caro, todos aceitam.',
+    qChar: '42. ★ 这段话主要想说明，质量好的东西可以：', qPinyin: '42. ★ Zhè duàn huà zhǔyào xiǎng shuōmíng, zhìliàng hǎo de dōngxi kěyǐ:', qTrans: '42. ★ O texto quer mostrar que coisas de boa qualidade podem:',
+    options: ['A 卖得贵', 'B 卖得快', 'C 用得久', 'D 很流行'],
+    optionsPinyin: ['A mài de guì', 'B mài de kuài', 'C yòng de jiǔ', 'D hěn liúxíng'],
+    optionsTrans: ['A Ser vendidas mais caro', 'B Ser vendidas rápido', 'C Durar muito tempo', 'D Ser muito populares'],
+    correctAnswer: 0, explanation: '质量好...价格贵一点儿也没关系 (boa qualidade justifica preço mais alto): 卖得贵.'
+},
+{
+    id: 43, part: 3, section: 'reading', type: 'mcq',
+    instructionChar: '第 42 到 43 题是根据下面一段话：', instructionPinyin: 'Dì 42 dào 43 tí shì gēnjù xiàmiàn yī duàn huà:',
+    instructionTrans: 'As questões 42-43 baseiam-se no seguinte texto:',
+    passageChar: '你卖的东西可不可以比别人卖的价格高？这主要要看东西的质量。如果质量比别人的好，那么价格比别人的贵一点儿也没关系。另外，环境和服务水平也很重要。质量完全一样的东西，但如果环境和服务更好，那么即使贵一点儿，大家也能接受。',
+    passagePinyin: '...huánjìng hé fúwù shuǐpíng yě hěn zhòngyào...huánjìng hé fúwù gèng hǎo...dàjiā yě néng jiēshòu.',
+    passageTrans: '(mesmo texto) ... o ambiente e o serviço também importam ... se forem melhores, todos aceitam pagar mais...',
+    qChar: '43. ★ 质量相同的东西，怎样能卖更高的价格？', qPinyin: '43. ★ Zhìliàng xiāngtóng de dōngxi, zěnyàng néng mài gèng gāo de jiàgé?', qTrans: '43. ★ Produtos de mesma qualidade, como vender mais caro?',
+    options: ['A 做广告', 'B 送礼物', 'C 免费试用', 'D 提高服务水平'],
+    optionsPinyin: ['A zuò guǎnggào', 'B sòng lǐwù', 'C miǎnfèi shìyòng', 'D tígāo fúwù shuǐpíng'],
+    optionsTrans: ['A Fazer propaganda', 'B Dar brindes', 'C Oferecer teste grátis', 'D Melhorar o nível do serviço'],
+    correctAnswer: 3, explanation: '环境和服务更好...大家也能接受 (melhor ambiente/serviço faz aceitar preço maior): 提高服务水平.'
+},
+{ type: 'results', section: 'reading', heading: 'Resultado — 阅读 (Leitura)' },
+/* ============ SECTION: WRITING ============ */
+{
+    type: 'section', section: 'writing', badge: 'Teste 3 de 3', icon: ICON_PEN,
+    titleCn: '书写', titlePt: 'Escrita',
+    desc: '7 questões: ordenar palavras para formar frases corretas e criar frases a partir de imagens. Digite sua resposta e confira com o gabarito. Há também um espaço para rascunhar os caracteres.'
+},
+/* ---- W Part 1 intro ---- */
+{
+    type: 'intro', part: 1, section: 'writing', title: '第一部分', titlePinyin: 'Dì-yī bùfèn',
+    instructions: '第 44 到 48 题：完成句子。', instructionsPinyin: 'Dì 44 dào 48 tí: Wánchéng jùzi.',
+    examples: [{
+        text: '那座桥 / 800 年的 / 历史 / 有 / 了',
+        pinyin: 'nà zuò qiáo / 800 nián de / lìshǐ / yǒu / le',
+        trans: 'aquela ponte / de 800 anos / história / ter / (part.)',
+        q: '那座桥有 800 年的历史了。', qPinyin: 'Nà zuò qiáo yǒu 800 nián de lìshǐ le.',
+        qTrans: 'Aquela ponte já tem 800 anos de história.', ans: '那座桥有 800 年的历史了。'
+    }]
+},
+{
+    id: 44, part: 1, section: 'writing', type: 'arrange',
+    instructionChar: '第 44 到 48 题：完成句子。', instructionPinyin: 'Dì 44 dào 48 tí: Wánchéng jùzi.',
+    instructionTrans: 'Questões 44 a 48: Ordene as palavras formando a frase correta.',
+    words: '这双袜子 / 给我的 / 是 / 弟弟',
+    ansChar: '这双袜子是弟弟给我的。', ansPy: 'Zhè shuāng wàzi shì dìdi gěi wǒ de.',
+    ansTr: 'Este par de meias foi meu irmão mais novo que me deu.'
+},
+{
+    id: 45, part: 1, section: 'writing', type: 'arrange',
+    instructionChar: '第 44 到 48 题：完成句子。', instructionPinyin: 'Dì 44 dào 48 tí: Wánchéng jùzi.',
+    instructionTrans: 'Questões 44 a 48: Ordene as palavras formando a frase correta.',
+    words: '水 / 瓶子 / 的 / 满了 / 里',
+    ansChar: '瓶子里的水满了。', ansPy: 'Píngzi lǐ de shuǐ mǎn le.',
+    ansTr: 'A água dentro da garrafa está cheia.'
+},
+{
+    id: 46, part: 1, section: 'writing', type: 'arrange',
+    instructionChar: '第 44 到 48 题：完成句子。', instructionPinyin: 'Dì 44 dào 48 tí: Wánchéng jùzi.',
+    instructionTrans: 'Questões 44 a 48: Ordene as palavras formando a frase correta.',
+    words: '饮料 / 火车上 / 不提供 / 免费的',
+    ansChar: '火车上不提供免费的饮料。', ansPy: 'Huǒchē shang bù tígōng miǎnfèi de yǐnliào.',
+    ansTr: 'No trem não são fornecidas bebidas gratuitas.'
+},
+{
+    id: 47, part: 1, section: 'writing', type: 'arrange',
+    instructionChar: '第 44 到 48 题：完成句子。', instructionPinyin: 'Dì 44 dào 48 tí: Wánchéng jùzi.',
+    instructionTrans: 'Questões 44 a 48: Ordene as palavras formando a frase correta.',
+    words: '举行 / 这次电影艺术节 / 北京 / 会 / 在',
+    ansChar: '这次电影艺术节会在北京举行。', ansPy: 'Zhè cì diànyǐng yìshùjié huì zài Běijīng jǔxíng.',
+    ansTr: 'Este festival de arte cinematográfica será realizado em Pequim.'
+},
+{
+    id: 48, part: 1, section: 'writing', type: 'arrange',
+    instructionChar: '第 44 到 48 题：完成句子。', instructionPinyin: 'Dì 44 dào 48 tí: Wánchéng jùzi.',
+    instructionTrans: 'Questões 44 a 48: Ordene as palavras formando a frase correta.',
+    words: '对 / 非常感谢您 / 理解和支持 / 我们工作的',
+    ansChar: '非常感谢您对我们工作的理解和支持。', ansPy: 'Fēicháng gǎnxiè nín duì wǒmen gōngzuò de lǐjiě hé zhīchí.',
+    ansTr: 'Agradecemos muito a sua compreensão e apoio ao nosso trabalho.'
+},
+/* ---- W Part 2 intro ---- */
+{
+    type: 'intro', part: 2, section: 'writing', title: '第二部分', titlePinyin: 'Dì-èr bùfèn',
+    instructions: '第 49 到 50 题：看图，用词造句。', instructionsPinyin: 'Dì 49 dào 50 tí: Kàn tú, yòng cí zàojù.',
+    examples: [{
+        text: '乒乓球 (pīngpāngqiú)', pinyin: 'pīngpāngqiú', trans: 'pingue-pongue',
+        q: '她很喜欢打乒乓球。', qPinyin: 'Tā hěn xǐhuan dǎ pīngpāngqiú.',
+        qTrans: 'Ela gosta muito de jogar pingue-pongue.', ans: '她很喜欢打乒乓球。'
+    }]
+},
+{
+    id: 49, part: 2, section: 'writing', type: 'create',
+    instructionChar: '第 49 到 50 题：看图，用词造句。', instructionPinyin: 'Dì 49 dào 50 tí: Kàn tú, yòng cí zàojù.',
+    instructionTrans: 'Questões 49 e 50: Olhe a imagem e crie uma frase com a palavra.',
+    words: '尝 (cháng)',
+    img: imgBlock(IMG_CHANG, SVG_CHANG, 'svg-fb-49'),
+    ansChar: '我尝了尝，这个菜味道真不错。',
+    ansPy: 'Wǒ cháng le cháng, zhège cài wèidào zhēn búcuò.',
+    ansTr: 'Eu provei um pouco: o sabor deste prato é realmente bom.'
+},
+{
+    id: 50, part: 2, section: 'writing', type: 'create',
+    instructionChar: '第 49 到 50 题：看图，用词造句。', instructionPinyin: 'Dì 49 dào 50 tí: Kàn tú, yòng cí zàojù.',
+    instructionTrans: 'Questões 49 e 50: Olhe a imagem e crie uma frase com a palavra.',
+    words: '轻 (qīng)',
+    img: imgBlock(IMG_QING, SVG_QING, 'svg-fb-50'),
+    ansChar: '他送来的东西挺轻的，我自己带回去就行了。',
+    ansPy: 'Tā sòng lái de dōngxi tǐng qīng de, wǒ zìjǐ dài huíqù jiù xíng le.',
+    ansTr: 'As coisas que ele trouxe são bem leves; eu mesmo posso levá-las de volta.'
+},
+{ type: 'results', section: 'writing', heading: 'Resultado — 书写 (Escrita)', isFinal: true },
+];
+/* ===================== HELPERS ===================== */
+function wrapText(text) {
+    if (!text) return '';
+    let s = text.replace(/\n/g, '<br>');
+    s = s.replace(/\[BLANK\]/g, '<span id="fill-placeholder" class="fill-blank-slot">＿＿</span>');
+    let r = '', i = 0;
+    while (i < s.length) {
+        if (s[i] === '<') {
+            let e = s.indexOf('>', i);
+            r += s.substring(i, e + 1);
+            i = e + 1;
+            continue;
+        }
+        if (!/[一-龥]/.test(s[i])) { r += s[i]; i++; continue; }
+        let m = false;
+        for (let len = 6; len >= 2; len--) {
+            if (i + len <= s.length) {
+                let w = s.substring(i, i + len);
+                if (wordsDict[w]) {
+                    r += '<span class="char-interactive" data-word="' + w + '">' + w + '</span>';
+                    i += len; m = true; break;
+                }
+            }
+        }
+        if (!m) {
+            let c = s[i];
+            r += '<span class="char-interactive" data-word="' + c + '">' + c + '</span>';
+            i++;
+        }
+    }
+    return r;
+}
+function toggleDisp(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.style.display = (el.style.display === 'none' || el.style.display === '') ? 'block' : 'none';
+}
+window.toggleDisp = toggleDisp;
+function normalizeStr(str) {
+    return (str || '').replace(/[。，！？、\s,.!?“”"]/g, '');
+}
+/* ===================== STATE ===================== */
+let currentIndex = 0;
+const userAnswers = new Array(questionsData.length).fill(null);
+const checkedAnswers = new Array(questionsData.length).fill(false);
+let canvasCtx = null, isDrawing = false;
+const SECTIONS = [
+    { key: 'listening', cn: '听力', pt: 'Escuta' },
+    { key: 'reading', cn: '阅读', pt: 'Leitura' },
+    { key: 'writing', cn: '书写', pt: 'Escrita' }
+];
+const ui = {
+    progress: document.getElementById('progress-text'),
+    part: document.getElementById('part-text'),
+    titleMain: document.getElementById('title-main'),
+    titleSub: document.getElementById('title-sub'),
+    tracker: document.getElementById('section-tracker'),
+    audioInstr: document.getElementById('audio-instruction'),
+    panelIcon: document.getElementById('panel-icon'),
+    sectionScreen: document.getElementById('section-screen'),
+    sectionBadge: document.getElementById('section-badge'),
+    sectionIconHolder: document.getElementById('section-icon-holder'),
+    sectionTitleCn: document.getElementById('section-title-cn'),
+    sectionTitlePt: document.getElementById('section-title-pt'),
+    sectionDesc: document.getElementById('section-desc'),
+    sectionPrev: document.getElementById('section-prev-result'),
+    btnStartSection: document.getElementById('btn-start-section'),
+    introScreen: document.getElementById('intro-screen'),
+    introTitle: document.getElementById('intro-title-text'),
+    introTitlePy: document.getElementById('intro-title-pinyin'),
+    introInstr: document.getElementById('intro-instructions-text'),
+    introInstrPy: document.getElementById('intro-instructions-pinyin'),
+    introExamples: document.getElementById('intro-examples-area'),
+    btnStartPart: document.getElementById('btn-start-part'),
+    questionScreen: document.getElementById('question-screen'),
+    instBlock: document.getElementById('instruction-block'),
+    instChars: document.getElementById('instruction-chars'),
+    instPinyin: document.getElementById('instruction-pinyin'),
+    instTrans: document.getElementById('instruction-trans'),
+    scriptBlock: document.getElementById('script-block'),
+    scriptLabel: document.getElementById('script-label-text'),
+    scriptChars: document.getElementById('script-chars'),
+    scriptPinyin: document.getElementById('script-pinyin'),
+    scriptTrans: document.getElementById('script-trans'),
+    qBlock: document.getElementById('question-block'),
+    qLabel: document.getElementById('question-label-text'),
+    qChars: document.getElementById('question-chars'),
+    qPinyin: document.getElementById('question-pinyin'),
+    qTrans: document.getElementById('question-trans'),
+    optionsWrap: document.getElementById('options-wrapper-area'),
+    optionsLabel: document.getElementById('options-label-text'),
+    optionsArea: document.getElementById('options-area'),
+    writingArea: document.getElementById('writing-area'),
+    expDisplay: document.getElementById('explanation-display'),
+    supportControls: document.getElementById('support-controls'),
+    resultsScreen: document.getElementById('results-screen'),
+    resultsHeading: document.getElementById('results-heading'),
+    resultsCaption: document.getElementById('results-caption'),
+    resultsScore: document.getElementById('results-score-text'),
+    resultsPct: document.getElementById('results-percentage'),
+    resultsList: document.getElementById('results-list'),
+    btnAfterResults: document.getElementById('btn-after-results'),
+    navBar: document.getElementById('navigation-bar'),
+    btnPrev: document.getElementById('btn-prev'),
+    btnNext: document.getElementById('btn-next'),
+    btnPrevPart: document.getElementById('btn-prev-part'),
+    btnNextPart: document.getElementById('btn-next-part'),
+    tooltip: document.getElementById('tooltip'),
+    ttPinyin: document.getElementById('tt-pinyin-text'),
+    ttTrans: document.getElementById('tt-trans-text'),
+    ttChars: document.getElementById('tt-chars-breakdown'),
+    interactionArea: document.getElementById('interaction-area'),
+    btnInfo: document.getElementById('btn-info'),
+    modalInfo: document.getElementById('info-modal'),
+    btnCloseModal: document.getElementById('btn-close-modal')
+};
+ui.titleMain.innerHTML = wrapText('HSK 4 第六课');
+ui.titleSub.textContent = '一分钱一分货';
+/* ===================== HELPERS ===================== */
+function sectionIndexOf(key) { return SECTIONS.findIndex(s => s.key === key); }
+function partLabel(p) { return p === 1 ? '第一部分' : (p === 2 ? '第二部分' : '第三部分'); }
+function isAutoGraded(q) { return ['tf', 'mc', 'fill', 'order', 'mcq'].includes(q.type); }
+function scoreSection(key) {
+    let correct = 0, total = 0;
+    questionsData.forEach((q, idx) => {
+        if (q.section !== key || q.type === 'intro' || q.type === 'section' || q.type === 'results') return;
+        total++;
+        if (q.type === 'create') { if (userAnswers[idx]) correct++; return; }
+        if (q.type === 'arrange') {
+            if (checkedAnswers[idx] && normalizeStr(userAnswers[idx] || '') === normalizeStr(q.ansChar)) correct++;
+            return;
+        }
+        if (checkedAnswers[idx] && userAnswers[idx] === q.correctAnswer) correct++;
+    });
+    return { correct, total };
+}
+/* ===================== RENDER ===================== */
+function hideAll() {
+    ui.sectionScreen.style.display = 'none';
+    ui.introScreen.style.display = 'none';
+    ui.questionScreen.style.display = 'none';
+    ui.resultsScreen.style.display = 'none';
+}
+function updateTracker(activeKey) {
+    let html = '';
+    SECTIONS.forEach(s => {
+        const sIdx = sectionIndexOf(s.key), aIdx = sectionIndexOf(activeKey);
+        let cls = sIdx < aIdx ? 'done' : (sIdx === aIdx ? 'active' : '');
+        html += '<div class="track-item ' + cls + '"><span class="dot"></span>' + s.cn + ' · ' + s.pt + '</div>';
+    });
+    ui.tracker.innerHTML = html;
+}
+function renderView() {
+    hideAll();
+    const item = questionsData[currentIndex];
+    ui.navBar.style.display = 'flex';
+    updateTracker(item.section);
+    ui.audioInstr.style.display = item.section === 'listening' ? 'flex' : 'none';
+    if (item.type === 'section') renderSection(item);
+    else if (item.type === 'intro') renderIntro(item);
+    else if (item.type === 'results') renderResults(item);
+    else renderQuestion(item);
+    setupNav(item);
+}
+function setupNav(item) {
+    ui.btnPrev.disabled = currentIndex === 0;
+    const last = currentIndex === questionsData.length - 1;
+    if (item.type === 'results') {
+        ui.btnNext.style.display = 'none';
+    } else {
+        ui.btnNext.style.display = 'flex';
+        ui.btnNext.innerHTML = last ? 'Fim' : 'Próximo <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>';
+        ui.btnNext.disabled = last;
+    }
+    let nextPartIdx = -1, prevPartIdx = -1;
+    for (let i = currentIndex + 1; i < questionsData.length; i++) {
+        if (questionsData[i].type === 'intro' || questionsData[i].type === 'section') { nextPartIdx = i; break; }
+    }
+    for (let i = currentIndex - 1; i >= 0; i--) {
+        if (questionsData[i].type === 'intro' || questionsData[i].type === 'section') { prevPartIdx = i; break; }
+    }
+    ui.btnNextPart.disabled = nextPartIdx === -1;
+    ui.btnPrevPart.disabled = prevPartIdx === -1;
+    ui.btnNextPart.onclick = () => { if (nextPartIdx !== -1) { currentIndex = nextPartIdx; renderView(); hideTooltip(); } };
+    ui.btnPrevPart.onclick = () => { if (prevPartIdx !== -1) { currentIndex = prevPartIdx; renderView(); hideTooltip(); } };
+}
+function renderSection(data) {
+    ui.sectionScreen.style.display = 'flex';
+    ui.progress.textContent = '';
+    ui.part.textContent = data.titleCn;
+    ui.sectionBadge.textContent = data.badge;
+    ui.sectionIconHolder.innerHTML = data.icon;
+    ui.sectionTitleCn.textContent = data.titleCn;
+    ui.sectionTitlePt.textContent = data.titlePt;
+    ui.sectionDesc.textContent = data.desc;
+    const sIdx = sectionIndexOf(data.section);
+    if (sIdx > 0) {
+        const prevKey = SECTIONS[sIdx - 1].key;
+        const sc = scoreSection(prevKey);
+        ui.sectionPrev.style.display = 'block';
+        ui.sectionPrev.innerHTML = 'Teste anterior (' + SECTIONS[sIdx - 1].cn + ' · ' + SECTIONS[sIdx - 1].pt + '): <strong>' + sc.correct + ' / ' + sc.total + '</strong> acertos';
+    } else {
+        ui.sectionPrev.style.display = 'none';
+    }
+    ui.btnStartSection.onclick = () => { currentIndex++; renderView(); hideTooltip(); };
+}
+function renderIntro(data) {
+    ui.introScreen.style.display = 'flex';
+    ui.part.innerHTML = wrapText(data.title);
+    ui.progress.textContent = '';
+    ui.introTitle.innerHTML = wrapText(data.title);
+    ui.introTitlePy.textContent = data.titlePinyin;
+    ui.introTitlePy.style.display = 'none';
+    ui.introInstr.innerHTML = wrapText(data.instructions);
+    ui.introInstrPy.textContent = data.instructionsPinyin;
+    ui.introInstrPy.style.display = 'none';
+    let html = '';
+    data.examples.forEach((ex, idx) => {
+        html += '<div class="example-box"><div class="example-label">Exemplo ' + (idx + 1) + '</div>';
+        html += '<div class="chinese-text" style="font-size:20px;">' + wrapText(ex.text !== undefined ? ex.text : ex.audio) + '</div>';
+        html += '<div style="display:flex;gap:8px;margin-top:8px;"><button class="btn-translate-inline" onclick="toggleDisp(\'exap-' + idx + '\')">拼 Pinyin</button><button class="btn-translate-inline" onclick="toggleDisp(\'exat-' + idx + '\')">A/文 Tradução</button></div>';
+        html += '<div id="exap-' + idx + '" class="pinyin-display" style="color:var(--color-jade);font-size:16px;margin-bottom:10px;display:none;">' + ex.pinyin + '</div>';
+        html += '<div id="exat-' + idx + '" class="translation-display" style="margin-bottom:20px;font-size:16px;">' + ex.trans + '</div>';
+        html += '<div class="chinese-text" style="font-size:20px;margin-top:15px;">' + wrapText(ex.q) + '</div>';
+        html += '<div style="display:flex;gap:8px;margin-top:8px;"><button class="btn-translate-inline" onclick="toggleDisp(\'exqp-' + idx + '\')">拼 Pinyin</button><button class="btn-translate-inline" onclick="toggleDisp(\'exqt-' + idx + '\')">A/文 Tradução</button></div>';
+        html += '<div id="exqp-' + idx + '" class="pinyin-display" style="color:var(--color-jade);font-size:16px;margin-bottom:10px;display:none;">' + ex.qPinyin + '</div>';
+        html += '<div id="exqt-' + idx + '" class="translation-display" style="margin-bottom:15px;font-size:16px;">' + ex.qTrans + '</div>';
+        html += '<div style="color:var(--color-gold);font-weight:bold;font-size:18px;margin-top:15px;border-top:1px dashed var(--color-gold);padding-top:10px;">[ Resposta: ' + wrapText(ex.ans) + ' ]</div></div>';
+    });
+    ui.introExamples.innerHTML = html;
+    ui.btnStartPart.onclick = () => { currentIndex++; renderView(); hideTooltip(); };
+}
+function resetTransToggles() {
+    ['instruction-pinyin', 'instruction-trans', 'script-pinyin', 'script-trans', 'question-pinyin', 'question-trans'].forEach(id => {
+        const e = document.getElementById(id);
+        if (e) e.style.display = 'none';
+    });
+}
+function renderQuestion(q) {
+    ui.questionScreen.style.display = 'flex';
+    ui.progress.textContent = 'Questão ' + q.id;
+    ui.part.innerHTML = wrapText(partLabel(q.part));
+    resetTransToggles();
+    ui.expDisplay.style.display = 'none';
+    ui.expDisplay.innerHTML = '';
+    ui.scriptBlock.style.display = 'none';
+    ui.writingArea.innerHTML = '';
+    ui.writingArea.style.display = 'none';
+    ui.optionsWrap.style.display = 'block';
+    ui.instChars.innerHTML = wrapText(q.instructionChar);
+    ui.instPinyin.textContent = q.instructionPinyin || '';
+    ui.instTrans.textContent = q.instructionTrans || '';
+    const isChecked = checkedAnswers[currentIndex];
+    if (q.type === 'tf' || q.type === 'mc') {
+        ui.scriptLabel.textContent = 'Texto do Áudio';
+        ui.scriptChars.innerHTML = wrapText(q.audioChar);
+        ui.scriptPinyin.textContent = q.audioPinyin || '';
+        ui.scriptTrans.textContent = q.audioTrans || '';
+    }
+    if (q.type === 'mcq' && q.passageChar) {
+        ui.scriptLabel.textContent = 'Texto Base';
+        ui.scriptChars.innerHTML = wrapText(q.passageChar);
+        ui.scriptPinyin.textContent = q.passagePinyin || '';
+        ui.scriptTrans.textContent = q.passageTrans || '';
+        ui.scriptBlock.style.display = 'block';
+    }
+    if (q.type === 'order') {
+        ui.qBlock.style.display = 'none';
+    } else {
+        ui.qBlock.style.display = 'block';
+        ui.qChars.innerHTML = wrapText(q.qChar);
+        ui.qPinyin.textContent = q.qPinyin || '';
+        ui.qTrans.textContent = q.qTrans || '';
+    }
+    ui.qLabel.textContent = (q.type === 'tf') ? 'Afirmação' : (q.type === 'arrange' || q.type === 'create') ? 'Tarefa' : 'Questão';
+    if (q.type === 'tf' || q.type === 'mc') renderChoiceOptions(q, isChecked);
+    else if (q.type === 'fill') renderFill(q, isChecked);
+    else if (q.type === 'order') renderOrder(q, isChecked);
+    else if (q.type === 'mcq') renderMcq(q, isChecked);
+    else if (q.type === 'arrange' || q.type === 'create') renderWriting(q, isChecked);
+    buildSupportControls(q, isChecked);
+    if (q.explanation) {
+        ui.expDisplay.innerHTML = '<h4><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg> Explicação:</h4>' + q.explanation;
+    }
+}
+/* ---- choice (tf/mc) ---- */
+function renderChoiceOptions(q, isChecked) {
+    ui.optionsLabel.textContent = 'Opções';
+    ui.optionsArea.className = 'options-container' + (q.type === 'tf' ? ' tf-mode' : '');
+    ui.optionsArea.innerHTML = '';
+    q.options.forEach((opt, index) => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'option-wrapper';
+        wrapper.style.width = q.type === 'tf' ? 'auto' : '100%';
+        const btn = document.createElement('div');
+        btn.className = 'option-btn' + (q.type === 'tf' ? ' tf-btn' : '');
+        const letter = q.type === 'tf' ? '' : String.fromCharCode(65 + index) + ': ';
+        btn.innerHTML = q.type === 'tf' ? opt : '<strong>' + letter + '</strong>&nbsp;' + wrapText(opt);
+        if (userAnswers[currentIndex] === index) btn.classList.add('selected');
+        if (isChecked) {
+            btn.classList.add('locked');
+            if (index === q.correctAnswer) btn.classList.add('is-correct');
+            else if (userAnswers[currentIndex] === index) btn.classList.add('is-incorrect');
+        } else {
+            btn.onclick = () => { userAnswers[currentIndex] = index; renderView(); };
+        }
+        wrapper.appendChild(btn);
+        if (q.type !== 'tf' && q.optionsPinyin) {
+            const ctr = document.createElement('div');
+            ctr.className = 'option-controls';
+            ctr.innerHTML = '<button class="btn-translate-inline" onclick="toggleDisp(\'optp-' + index + '\')">拼 Pinyin</button><button class="btn-translate-inline" onclick="toggleDisp(\'optt-' + index + '\')">A/文 Tradução</button>';
+            wrapper.appendChild(ctr);
+            const pd = document.createElement('div');
+            pd.id = 'optp-' + index; pd.className = 'pinyin-display'; pd.textContent = q.optionsPinyin[index];
+            pd.style.borderTop = 'none'; pd.style.paddingTop = '0'; pd.style.display = 'none';
+            wrapper.appendChild(pd);
+            const td = document.createElement('div');
+            td.id = 'optt-' + index; td.className = 'translation-display'; td.textContent = q.optionsTrans[index];
+            td.style.borderTop = 'none'; td.style.paddingTop = '0';
+            wrapper.appendChild(td);
+        }
+        ui.optionsArea.appendChild(wrapper);
+    });
+}
+/* ---- fill ---- */
+function renderFill(q, isChecked) {
+    ui.optionsLabel.textContent = 'Banco de Palavras';
+    ui.optionsArea.className = '';
+    let html = '';
+    q.optionsBank.forEach((opt, idx) => {
+        const letter = opt.substring(0, 1);
+        let sel = (userAnswers[currentIndex] === letter) ? 'selected' : '';
+        let st = '';
+        if (isChecked) {
+            st = 'locked ';
+            if (letter === q.correctAnswer) st += 'is-correct';
+            else if (userAnswers[currentIndex] === letter) st += 'is-incorrect';
+        }
+        html += '<div class="r-option-wrapper ' + sel + ' ' + st + '"><div class="r-item" onclick="selectFill(\'' + letter + '\')"><span class="order-letter">' + letter + '</span><div class="option-content">' + wrapText(opt.substring(2)) + '</div></div>';
+        html += '<div class="option-controls"><button class="btn-translate-inline" onclick="toggleDisp(\'bkp-' + idx + '\')">拼 Pinyin</button><button class="btn-translate-inline" onclick="toggleDisp(\'bkt-' + idx + '\')">A/文 Tradução</button></div>';
+        html += '<div class="pinyin-display" id="bkp-' + idx + '" style="display:none;">' + q.optionsBankPinyin[idx] + '</div><div class="translation-display" id="bkt-' + idx + '">' + q.optionsBankTrans[idx] + '</div></div>';
+    });
+    ui.optionsArea.innerHTML = html;
+    setTimeout(() => {
+        const ph = document.getElementById('fill-placeholder');
+        if (ph && userAnswers[currentIndex]) {
+            ph.textContent = userAnswers[currentIndex];
+            if (isChecked) ph.classList.add(userAnswers[currentIndex] === q.correctAnswer ? 'is-correct' : 'is-incorrect');
+        }
+    }, 10);
+}
+window.selectFill = function(letter) {
+    if (checkedAnswers[currentIndex]) return;
+    userAnswers[currentIndex] = letter;
+    renderView();
+};
+/* ---- order ---- */
+function renderOrder(q, isChecked) {
+    ui.optionsLabel.textContent = 'Frases';
+    ui.optionsArea.className = '';
+    let sel = userAnswers[currentIndex] ? userAnswers[currentIndex].split('') : [];
+    let html = '';
+    ['A', 'B', 'C'].forEach((letter, idx) => {
+        let isSel = sel.includes(letter);
+        let st = isChecked ? 'locked ' : '';
+        html += '<div class="r-option-wrapper ' + (isSel ? 'selected' : '') + ' ' + st + '"><div class="r-item" onclick="selectOrder(\'' + letter + '\')"><span class="order-letter">' + letter + '</span><div class="option-content">' + wrapText(q.options[letter].c) + '</div></div>';
+        html += '<div class="option-controls"><button class="btn-translate-inline" onclick="toggleDisp(\'orp-' + idx + '\')">拼 Pinyin</button><button class="btn-translate-inline" onclick="toggleDisp(\'ort-' + idx + '\')">A/文 Tradução</button></div>';
+        html += '<div class="pinyin-display" id="orp-' + idx + '" style="display:none;">' + q.options[letter].p + '</div><div class="translation-display" id="ort-' + idx + '">' + q.options[letter].t + '</div></div>';
+    });
+    html += '<div class="order-sequence"><strong>Sua resposta:</strong>';
+    let corr = q.correctAnswer.split('');
+    for (let i = 0; i < 3; i++) {
+        let cl = '';
+        if (isChecked && sel[i]) cl = sel[i] === corr[i] ? 'is-correct' : 'is-incorrect';
+        html += '<div class="seq-box ' + (sel[i] ? 'filled' : '') + ' ' + cl + '">' + (sel[i] || '') + '</div>';
+    }
+    if (!isChecked) html += '<button class="btn-reset-small" onclick="clearOrder()">Limpar</button>';
+    html += '</div>';
+    ui.optionsArea.innerHTML = html;
+}
+window.selectOrder = function(letter) {
+    if (checkedAnswers[currentIndex]) return;
+    let cur = userAnswers[currentIndex] ? userAnswers[currentIndex].split('') : [];
+    if (cur.length < 3 && !cur.includes(letter)) {
+        cur.push(letter);
+        userAnswers[currentIndex] = cur.join('');
+        renderView();
+    }
+};
+window.clearOrder = function() {
+    if (checkedAnswers[currentIndex]) return;
+    userAnswers[currentIndex] = null;
+    renderView();
+};
+/* ---- mcq ---- */
+function renderMcq(q, isChecked) {
+    ui.optionsLabel.textContent = 'Opções';
+    ui.optionsArea.className = '';
+    let html = '';
+    q.options.forEach((opt, idx) => {
+        let sel = (userAnswers[currentIndex] === idx) ? 'selected' : '';
+        let st = '';
+        if (isChecked) {
+            st = 'locked ';
+            if (idx === q.correctAnswer) st += 'is-correct';
+            else if (userAnswers[currentIndex] === idx) st += 'is-incorrect';
+        }
+        html += '<div class="r-option-wrapper ' + sel + ' ' + st + '"><div class="r-item" onclick="selectMcq(' + idx + ')"><span class="order-letter">' + opt.substring(0, 1) + '</span><div class="option-content">' + wrapText(opt.substring(2)) + '</div></div>';
+        html += '<div class="option-controls"><button class="btn-translate-inline" onclick="toggleDisp(\'mqp-' + idx + '\')">拼 Pinyin</button><button class="btn-translate-inline" onclick="toggleDisp(\'mqt-' + idx + '\')">A/文 Tradução</button></div>';
+        html += '<div class="pinyin-display" id="mqp-' + idx + '" style="display:none;">' + q.optionsPinyin[idx] + '</div><div class="translation-display" id="mqt-' + idx + '">' + q.optionsTrans[idx] + '</div></div>';
+    });
+    ui.optionsArea.innerHTML = html;
+}
+window.selectMcq = function(idx) {
+    if (checkedAnswers[currentIndex]) return;
+    userAnswers[currentIndex] = idx;
+    renderView();
+};
+/* ---- writing (arrange/create) ---- */
+function renderWriting(q, isChecked) {
+    ui.optionsWrap.style.display = 'none';
+    ui.writingArea.style.display = 'block';
+    const cur = userAnswers[currentIndex] || '';
+    let html = '';
+    html += '<div class="text-block"><div class="text-label">' + (q.type === 'create' ? 'Palavra + Imagem' : 'Palavras para ordenar') + '</div>';
+    if (q.img) html += q.img;
+    html += '<div style="font-size:22px;font-weight:bold;margin:12px 0;letter-spacing:1px;">' + wrapText(q.words) + '</div>';
+    if (q.type === 'create') {
+        html += '<button class="btn-translate-inline" style="background:var(--color-primary);color:white;padding:9px 14px;font-size:13px;" onclick="toggleDisp(\'poss-' + q.id + '\')">💡 Mostrar Possível Resposta</button>';
+        html += '<div id="poss-' + q.id + '" class="possible-ans-box" style="display:none;"><div class="chinese-text" style="color:var(--color-jade);font-size:20px;">' + wrapText(q.ansChar) + '</div><div style="display:flex;gap:8px;margin-top:8px;"><button class="btn-translate-inline" onclick="toggleDisp(\'possp-' + q.id + '\')">拼 Pinyin</button><button class="btn-translate-inline" onclick="toggleDisp(\'posst-' + q.id + '\')">A/文 Tradução</button></div><div id="possp-' + q.id + '" class="pinyin-display" style="display:none;">' + q.ansPy + '</div><div id="posst-' + q.id + '" class="translation-display">' + q.ansTr + '</div></div>';
+    }
+    html += '</div>';
+    html += '<div class="writing-container"><div class="text-label">Rascunho de escrita livre (opcional)</div><div class="canvas-area"><canvas id="writeCanvas"></canvas><div class="canvas-tools"><button class="btn-clear" onclick="clearCanvas()">Limpar</button></div></div>';
+    html += '<div class="input-area"><div class="text-label">Digite sua resposta final:</div>';
+    html += '<input type="text" id="answerInput" class="answer-input" value="' + cur.replace(/"/g, '&quot;') + '" ' + (isChecked ? 'disabled' : '') + ' placeholder="Escreva em caracteres chineses..." autocomplete="off">';
+    html += '<button id="btnCheckWrite" class="btn-check-main" ' + (isChecked ? 'disabled' : '') + ' onclick="checkWriting()">' + (isChecked ? '✓ Resposta Registrada' : 'Checar Resposta') + '</button></div>';
+    html += '<div id="feedbackBox" class="feedback-box"></div></div>';
+    ui.writingArea.innerHTML = html;
+    setupCanvas();
+    const inp = document.getElementById('answerInput');
+    if (inp && !isChecked) inp.addEventListener('input', () => { userAnswers[currentIndex] = inp.value; });
+    if (isChecked) showWritingFeedback(q, cur);
+}
+window.checkWriting = function() {
+    const inp = document.getElementById('answerInput');
+    const t = (inp.value || '').trim();
+    if (!t) return;
+    userAnswers[currentIndex] = t;
+    checkedAnswers[currentIndex] = true;
+    renderView();
+};
+function showWritingFeedback(q, userText) {
+    const fb = document.getElementById('feedbackBox');
+    const inp = document.getElementById('answerInput');
+    if (!fb || !inp) return;
+    const isP2 = q.type === 'create';
+    const exact = normalizeStr(userText) === normalizeStr(q.ansChar);
+    inp.classList.remove('state-correct', 'state-incorrect', 'state-close');
+    if (isP2) inp.classList.add('state-close');
+    else inp.classList.add(exact ? 'state-correct' : 'state-incorrect');
+    fb.style.display = 'block';
+    let head;
+    if (isP2) {
+        fb.style.borderColor = 'var(--color-gold)';
+        head = '<div style="font-size:16px;font-weight:bold;color:var(--color-gold)">🌟 Resposta registrada! Veja a sugestão do gabarito:</div>';
+    } else {
+        fb.style.borderColor = exact ? 'var(--color-correct)' : 'var(--color-incorrect)';
+        head = '<div style="font-size:16px;font-weight:bold;color:' + (exact ? 'var(--color-correct)' : 'var(--color-incorrect)') + '">' + (exact ? '✅ Resposta Correta!' : '❌ Resposta diferente do gabarito') + '</div>';
+    }
+    fb.innerHTML = head + '<div style="margin-top:15px;"><div class="text-label">' + (isP2 ? 'Sugestão de Gabarito:' : 'Gabarito Oficial:') + '</div><div class="chinese-text" style="color:var(--color-jade);font-size:20px;">' + wrapText(q.ansChar) + '<button class="btn-translate-inline" onclick="toggleDisp(\'fbp\')">拼 Pinyin</button><button class="btn-translate-inline" onclick="toggleDisp(\'fbt\')">A/文 Tradução</button></div><div id="fbp" class="pinyin-display" style="display:none;">' + q.ansPy + '</div><div id="fbt" class="translation-display">' + q.ansTr + '</div></div>';
+}
+/* ---- canvas ---- */
+function setupCanvas() {
+    const canvas = document.getElementById('writeCanvas');
+    if (!canvas) return;
+    canvasCtx = canvas.getContext('2d');
+    const rect = canvas.parentElement.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = rect.height;
+    canvasCtx.lineWidth = 4;
+    canvasCtx.lineCap = 'round';
+    canvasCtx.strokeStyle = '#0369a1';
+    function pos(e) {
+        const r = canvas.getBoundingClientRect();
+        if (e.touches) return { x: e.touches[0].clientX - r.left, y: e.touches[0].clientY - r.top };
+        return { x: e.clientX - r.left, y: e.clientY - r.top };
+    }
+    const s = e => { isDrawing = true; const p = pos(e); canvasCtx.beginPath(); canvasCtx.moveTo(p.x, p.y); e.preventDefault(); };
+    const m = e => { if (!isDrawing) return; const p = pos(e); canvasCtx.lineTo(p.x, p.y); canvasCtx.stroke(); e.preventDefault(); };
+    const en = () => { isDrawing = false; };
+    canvas.addEventListener('mousedown', s);
+    canvas.addEventListener('mousemove', m);
+    canvas.addEventListener('mouseup', en);
+    canvas.addEventListener('mouseout', en);
+    canvas.addEventListener('touchstart', s, { passive: false });
+    canvas.addEventListener('touchmove', m, { passive: false });
+    canvas.addEventListener('touchend', en);
+}
+window.clearCanvas = function() {
+    const c = document.getElementById('writeCanvas');
+    if (canvasCtx && c) canvasCtx.clearRect(0, 0, c.width, c.height);
+};
+/* ---- support controls ---- */
+function buildSupportControls(q, isChecked) {
+    ui.supportControls.innerHTML = '';
+    if (q.type === 'arrange' || q.type === 'create') return;
+    if (q.type === 'tf' || q.type === 'mc') {
+        const b = document.createElement('button');
+        b.className = 'support-btn';
+        b.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> ' + (ui.scriptBlock.style.display === 'block' ? 'Ocultar Texto do Áudio' : 'Mostrar Texto do Áudio');
+        b.onclick = function() {
+            const h = ui.scriptBlock.style.display === 'none';
+            ui.scriptBlock.style.display = h ? 'block' : 'none';
+            b.classList.toggle('active', h);
+            b.innerHTML = b.innerHTML.replace(/Mostrar|Ocultar/, h ? 'Ocultar' : 'Mostrar');
+        };
+        ui.supportControls.appendChild(b);
+    }
+    const be = document.createElement('button');
+    be.className = 'support-btn btn-exp';
+    be.style.display = isChecked ? 'flex' : 'none';
+    be.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg> Ver Explicação';
+    be.onclick = () => { ui.expDisplay.style.display = ui.expDisplay.style.display === 'block' ? 'none' : 'block'; };
+    const bc = document.createElement('button');
+    bc.className = 'support-btn btn-check';
+    let canCheck = userAnswers[currentIndex] !== null && !(q.type === 'order' && (!userAnswers[currentIndex] || userAnswers[currentIndex].length < 3));
+    bc.disabled = !canCheck || isChecked;
+    bc.innerHTML = isChecked ? 'Corrigido <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>' : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Checar Resposta';
+    bc.onclick = () => {
+        if (checkedAnswers[currentIndex]) return;
+        checkedAnswers[currentIndex] = true;
+        renderView();
+    };
+    ui.supportControls.appendChild(be);
+    ui.supportControls.appendChild(bc);
+}
+/* ---- results ---- */
+function renderResults(item) {
+    ui.resultsScreen.style.display = 'flex';
+    ui.progress.textContent = 'Finalizado';
+    ui.part.textContent = 'Gabarito';
+    ui.resultsHeading.textContent = item.heading;
+    const sc = scoreSection(item.section);
+    ui.resultsScore.textContent = sc.correct + ' / ' + sc.total;
+    const pct = sc.total ? Math.round(sc.correct / sc.total * 100) : 0;
+    ui.resultsPct.textContent = pct + '% de aproveitamento';
+    ui.resultsCaption.textContent = item.section === 'writing' ? 'Você acertou (inclui respostas livres válidas)' : 'Você acertou';
+    let html = '';
+    questionsData.forEach((q, idx) => {
+        if (q.section !== item.section || ['intro', 'section', 'results'].includes(q.type)) return;
+        let statusClass = 'unanswered',
+            badge = '<div class="status-badge unanswered"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg> Não respondida</div>';
+        let gab = '';
+        if (q.type === 'create') {
+            gab = q.ansChar;
+            if (userAnswers[idx]) {
+                statusClass = 'close';
+                badge = '<div class="status-badge close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l2 2"/></svg> Resposta livre ✓</div>';
+            }
+        } else if (q.type === 'arrange') {
+            gab = q.ansChar;
+            if (checkedAnswers[idx]) {
+                const ok = normalizeStr(userAnswers[idx] || '') === normalizeStr(q.ansChar);
+                statusClass = ok ? 'correct' : 'incorrect';
+                badge = ok ? '<div class="status-badge correct"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Correto</div>' : '<div class="status-badge incorrect"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> Diferente</div>';
+            }
+        } else {
+            if (q.type === 'fill' || q.type === 'order') gab = q.correctAnswer;
+            else gab = String.fromCharCode(65 + q.correctAnswer) + ' ' + q.options[q.correctAnswer].substring(q.type === 'mcq' ? 2 : 0);
+            if (q.type === 'mc') gab = String.fromCharCode(65 + q.correctAnswer) + ' ' + q.options[q.correctAnswer];
+            if (q.type === 'tf') gab = q.options[q.correctAnswer];
+            if (checkedAnswers[idx]) {
+                const ok = userAnswers[idx] === q.correctAnswer;
+                statusClass = ok ? 'correct' : 'incorrect';
+                badge = ok ? '<div class="status-badge correct"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Correto</div>' : '<div class="status-badge incorrect"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> Errado</div>';
+            }
+        }
+        html += '<div class="result-item ' + statusClass + '"><div style="font-size:16px;font-weight:bold;color:var(--text-main);">Questão ' + q.id + '</div><div style="color:var(--text-muted);font-size:14px;flex:1;text-align:center;min-width:120px;">Gabarito: <strong style="color:var(--color-gold);">' + gab + '</strong></div>' + badge + '</div>';
+    });
+    ui.resultsList.innerHTML = html;
+    if (item.isFinal) {
+        ui.btnAfterResults.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg> Refazer Todos os Testes';
+        ui.btnAfterResults.onclick = () => location.reload();
+    } else {
+        const nextSec = questionsData[currentIndex + 1];
+        ui.btnAfterResults.innerHTML = 'Ir para o próximo teste: ' + (nextSec ? nextSec.titleCn : '') + ' <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>';
+        ui.btnAfterResults.onclick = () => { currentIndex++; renderView(); hideTooltip(); };
+    }
+}
+/* ===================== NAV BUTTONS ===================== */
+ui.btnPrev.onclick = () => { if (currentIndex > 0) { currentIndex--; renderView(); hideTooltip(); } };
+ui.btnNext.onclick = () => { if (currentIndex < questionsData.length - 1) { currentIndex++; renderView(); hideTooltip(); } };
+/* ===================== TOOLTIP ===================== */
+function showTooltip(e, word, type) {
+    let data = wordsDict[word] || charDict[word] || { p: '...', t: 'N/A' };
+    if (type === 'left') {
+        ui.ttPinyin.style.display = 'block';
+        ui.ttPinyin.textContent = data.p;
+        ui.ttTrans.textContent = data.t;
+        ui.ttChars.innerHTML = '';
+        if (word.length > 1) {
+            for (let i = 0; i < word.length; i++) {
+                let c = word[i];
+                let cd = charDict[c] || { p: '...', t: 'N/A' };
+                ui.ttChars.innerHTML += '<div class="tt-char-item"><strong>' + c + '</strong> <span>(' + cd.p + ')</span> - ' + cd.t + '</div>';
+            }
+        }
+    } else {
+        ui.ttPinyin.style.display = 'none';
+        ui.ttTrans.textContent = data.t;
+        ui.ttChars.innerHTML = '';
+    }
+    const x = e.clientX, y = e.clientY;
+    let l = x + 15, t = y + 15;
+    ui.tooltip.style.display = 'block';
+    const r = ui.tooltip.getBoundingClientRect();
+    if (l + r.width > window.innerWidth) l = x - r.width - 15;
+    if (t + r.height > window.innerHeight) t = y - r.height - 15;
+    ui.tooltip.style.left = l + 'px';
+    ui.tooltip.style.top = t + 'px';
+}
+function hideTooltip() { ui.tooltip.style.display = 'none'; }
+document.querySelector('.simulator-wrapper').addEventListener('mousedown', e => {
+    if (e.target.classList.contains('char-interactive')) {
+        const w = e.target.getAttribute('data-word');
+        if (e.button === 0) showTooltip(e, w, 'left');
+        else if (e.button === 2) showTooltip(e, w, 'right');
+    } else if (!e.target.closest('#tooltip')) hideTooltip();
+});
+document.querySelector('.simulator-wrapper').addEventListener('contextmenu', e => {
+    if (e.target.classList.contains('char-interactive')) e.preventDefault();
+});
+ui.interactionArea.addEventListener('scroll', hideTooltip);
+/* ===================== PANEL / MODAL ===================== */
+document.getElementById('btn-toggle-panel').addEventListener('click', () => {
+    document.getElementById('left-panel').classList.toggle('collapsed');
+});
+ui.btnInfo.onclick = () => ui.modalInfo.style.display = 'flex';
+ui.btnCloseModal.onclick = () => ui.modalInfo.style.display = 'none';
+/* ===================== START ===================== */
+renderView();
+    </script>
+</body>
+</html>
